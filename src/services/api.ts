@@ -2,7 +2,21 @@ import { AnalysisResult, ThreatIndicator, HoneypotLog } from '../types';
 import { mockCases } from '../data/mockCases';
 import { analyzeOpportunityInput } from '../utils/dynamicAnalyzer';
 
-const API_BASE = 'http://localhost:8000/api';
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return (import.meta.env.VITE_API_URL as string).replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8000/api';
+    }
+    // On Vercel / Production domain, use same-origin /api route
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:8000/api';
+};
+
+const API_BASE = getApiBase();
 
 export interface BackendHealth {
   status: string;
