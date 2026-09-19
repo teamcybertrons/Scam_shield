@@ -87,22 +87,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
               </button>
             </div>
 
-            {/* 3 Core Technical Capabilities Chips */}
-            <div className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800/90 text-xs font-mono text-slate-300 shadow-sm backdrop-blur-md hover:border-cyan-500/40 transition">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Deterministic AI</span>
-              </div>
-              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800/90 text-xs font-mono text-slate-300 shadow-sm backdrop-blur-md hover:border-cyan-500/40 transition">
-                <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                <span>&lt; 14ms Inspection</span>
-              </div>
-              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800/90 text-xs font-mono text-slate-300 shadow-sm backdrop-blur-md hover:border-cyan-500/40 transition">
-                <Globe className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                <span>Live Threat Radar</span>
-              </div>
-            </div>
-
           </div>
 
           {/* Right Column: Pure Floating 3D Hologram Orb */}
