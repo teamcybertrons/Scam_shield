@@ -80,56 +80,17 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
     }
   };
 
-  // Predefined realistic evaluation scenarios
-  const testScenarios = [
-    {
-      title: 'Legitimate Infosys Careers',
-      type: 'URL' as const,
-      value: 'https://www.infosys.com/careers/',
-      badge: 'Genuine',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-    },
-    {
-      title: 'Fake Internship + UPI Deposit (₹2,500)',
-      type: 'MESSAGE' as const,
-      value: 'Congratulations! You have been selected for the Infosys Remote Internship. Please deposit ₹2,500 refundable laptop caution fee via UPI to securityfee.tcs@oksbi within 2 hours to confirm your joining.',
-      badge: 'Advance Fee Fraud',
-      badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-    },
-    {
-      title: 'Phishing Lookalike Domain',
-      type: 'URL' as const,
-      value: 'https://infosys-careers.top/internship-registration',
-      badge: 'Lookalike Domain',
-      badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-    },
-    {
-      title: 'Telegram Recruiter Impersonation',
-      type: 'MESSAGE' as const,
-      value: 'Google Talent HR: Direct selection for Summer 2025. No technical interview required. Fill this Google Form with Aadhaar and bank details to secure ₹45,000 stipend slot.',
-      badge: 'Data Harvest',
-      badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-    }
-  ];
-
-  const handleSelectScenario = (sc: typeof testScenarios[0]) => {
-    setActiveTab(sc.type);
-    if (sc.type === 'URL') {
-      setUrl(sc.value);
-    } else if (sc.type === 'MESSAGE') {
-      setMessage(sc.value);
-    }
-    onAnalyze(sc.type, sc.value);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (activeTab === 'URL') {
-      onAnalyze('URL', url || 'https://infosys-careers.top/apply');
+      if (!url.trim()) return;
+      onAnalyze('URL', url.trim());
     } else if (activeTab === 'MESSAGE') {
-      onAnalyze('MESSAGE', message || 'Selected for TCS Internship. Pay 2500 security deposit to confirm.');
+      if (!message.trim()) return;
+      onAnalyze('MESSAGE', message.trim());
     } else {
-      onAnalyze('SCREENSHOT', screenshotName || 'Offer letter: Pay Rs 2500 refundable laptop deposit to HR');
+      if (!uploadedImagePreview && !screenshotName && !uploadedFileName) return;
+      onAnalyze('SCREENSHOT', screenshotName || uploadedFileName || 'Document Analysis');
     }
   };
 
@@ -148,37 +109,6 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
         <p className="text-sm text-slate-300 leading-relaxed">
           Submit any application link, recruiter email, or offer screenshot to execute deterministic scoring and AI linguistic analysis against live threat intelligence.
         </p>
-      </div>
-
-      {/* Quick Test Scenarios Bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
-          <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>QUICK PRESET TEST SCENARIOS (CLICK TO EVALUATE):</span>
-          </span>
-          <span>FastAPI Live Triangulation</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {testScenarios.map((sc, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => handleSelectScenario(sc)}
-              className="p-3 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/40 text-left transition cursor-pointer group space-y-1.5"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-slate-400">{sc.type}</span>
-                <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${sc.badgeColor}`}>
-                  {sc.badge}
-                </span>
-              </div>
-              <p className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
-                {sc.title}
-              </p>
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Main Analyzer Card */}
@@ -300,20 +230,10 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
                     Supported formats: PNG, JPEG, WEBP, PDF (Max 25MB)
                   </p>
                   
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <span className="text-xs font-medium text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-md border border-cyan-500/30">
-                      Choose File
+                  <div className="flex items-center justify-center mt-4">
+                    <span className="text-xs font-semibold text-cyan-300 bg-cyan-500/10 px-4 py-2 rounded-lg border border-cyan-500/30 group-hover:bg-cyan-500/20 transition">
+                      Browse Computer Files
                     </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setScreenshotName('Offer Letter: Selected for Tech Role. Deposit ₹2,500 laptop fee via UPI to securityfee.tcs@oksbi within 2 hours.');
-                      }}
-                      className="text-xs font-medium text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 px-3 py-1 rounded-md border border-slate-700 transition"
-                    >
-                      Load Sample Offer Letter
-                    </button>
                   </div>
                 </div>
               ) : (

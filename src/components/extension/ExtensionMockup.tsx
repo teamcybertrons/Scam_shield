@@ -80,13 +80,6 @@ export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, 
     rawIndicators: { sslValid: false, domainAgeDays: 3, registrar: 'NameCheap Inc.', honeypotMatches: 12, aiToxicityScore: 91, telegramOrWhatsappHop: true, upfrontFeeRequested: true }
   });
 
-  const presetUrls = [
-    { label: 'Infosys Phishing Lookalike', url: 'https://infosys-careers-apply.xyz/internship-registration' },
-    { label: 'Genuine Infosys Careers', url: 'https://www.infosys.com/careers/' },
-    { label: 'TCS Fake Onboarding', url: 'https://tcs-global-onboarding.xyz/deposit-verify' },
-    { label: 'Google Summer Phishing', url: 'https://google-internship-portal.link/form' }
-  ];
-
   const handleSimulateInspection = async (testUrl: string) => {
     setSimUrl(testUrl);
     setIsSimAnalyzing(true);
@@ -463,22 +456,8 @@ async function inspectTabSecurity(tabId, url) {
               <span>Interactive Extension Live Tester</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Test any URL in real-time to see how the ScamShield extension audits pages and alerts the user.
+              Type any URL below to see how the ScamShield extension audits pages and alerts the user in real time.
             </p>
-          </div>
-
-          {/* Quick Preset Picker */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-mono text-slate-400 mr-1">Presets:</span>
-            {presetUrls.map((preset, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSimulateInspection(preset.url)}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-slate-800 transition cursor-pointer"
-              >
-                {preset.label}
-              </button>
-            ))}
           </div>
         </div>
 

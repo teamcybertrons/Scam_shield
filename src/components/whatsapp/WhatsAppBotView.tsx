@@ -53,12 +53,6 @@ export const WhatsAppBotView: React.FC<WhatsAppBotViewProps> = ({ onOpenReport, 
   const [isTyping, setIsTyping] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState<any>(null);
 
-  const samplePrompts = [
-    'Selected for Infosys Internship. Pay ₹2,500 laptop deposit via UPI to securityfee.tcs@oksbi within 2 hours.',
-    'Google Summer Internship: No interview needed. Upload Aadhaar and PAN scan to form.',
-    'Can you check https://www.infosys.com/careers/ is it authentic?'
-  ];
-
   const handleSend = async (e?: React.FormEvent, directText?: string) => {
     if (e) e.preventDefault();
     const textToSend = directText || inputText;
@@ -220,19 +214,7 @@ export const WhatsAppBotView: React.FC<WhatsAppBotViewProps> = ({ onOpenReport, 
 
             </div>
 
-            {/* Quick Test Prompt Buttons */}
-            <div className="bg-[#111b21] px-3 py-1.5 border-t border-slate-800 flex gap-1.5 overflow-x-auto">
-              {samplePrompts.map((p, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSend(undefined, p)}
-                  className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded-md whitespace-nowrap border border-slate-700 cursor-pointer"
-                >
-                  Scenario {idx + 1} ↗
-                </button>
-              ))}
-            </div>
+            {/* WhatsApp Typing Form */}
 
             {/* WhatsApp Typing Form */}
             <form onSubmit={handleSend} className="bg-[#1f2c34] p-2.5 flex items-center gap-2 border-t border-slate-800">
