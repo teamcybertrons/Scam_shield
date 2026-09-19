@@ -1,24 +1,41 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Node dependencies
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# WhatsApp Bot Session Credentials (DO NOT PUSH TO GITHUB)
+baileys_auth
+.wwebjs_auth
+.wwebjs_cache
+auth_info_baileys
+
+# Environment & Secrets
+.env
+*.env.local
+
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.venv
+env/
+venv/
+
+# Database files (optional, can be auto-seeded)
+*.db-journal
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Editor & OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
-*.ntvs*
-*.njsproj
 *.sln
-*.sw?
