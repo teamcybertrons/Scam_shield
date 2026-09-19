@@ -325,6 +325,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const analysisData = analyzeOpportunityInput(scanType, extractedInput);
       currentAnalysisId = analysisData.id;
 
+      // Display loader animation for 2 seconds before showing risk score
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // Render Results
       renderResults(analysisData, pageTitle, extractedInput.length);
 
@@ -412,7 +415,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const analysis = analyzeOpportunityInput('URL', inputVal);
         setTimeout(() => {
           renderResults(analysis, inputVal.slice(0, 30), inputVal.length);
-        }, 400);
+        }, 2000);
       }
     });
 
