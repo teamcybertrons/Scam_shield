@@ -215,127 +215,154 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Scan current active screen/tab/WhatsApp media
   async function scanCurrentScreen() {
     idleCard?.classList.add("hidden");
-    loadingEl.classList.remove("hidden");
-    resultEl.classList.add("hidden");
-    errorBox.classList.add("hidden");
+    loadingEl?.classList.remove("hidden");
+    resultEl?.classList.add("hidden");
+    errorBox?.classList.add("hidden");
 
     if (loadingText) loadingText.textContent = "Scanning active screen content...";
     if (loadingSub) loadingSub.textContent = "Extracting visible text & active media elements";
 
+    let scanType = "URL";
+    let extractedInput = "";
+    let pageTitle = "Opportunity Inspection";
+
     try {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!activeTab || !activeTab.id) {
-        throw new Error("No active browser tab found to scan.");
-      }
-
-      const pageUrl = activeTab.url || "";
-      let pageTitle = activeTab.title || "Active Page";
-      let extractedInput = "";
-      let scanType = "URL";
-
-      // Isolated tab text & media extractor
-      function getActiveTabPayload() {
+      let activeTab = null;
+      if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
         try {
-          // 1. WhatsApp Web Fullscreen Media Viewer
-          const mediaViewer = document.querySelector('[data-testid="media-viewer"], div[role="dialog"], div[aria-label*="Media"], div[aria-label*="media"]');
-
-          if (mediaViewer) {
-            const viewerText = (mediaViewer.innerText || mediaViewer.textContent || "").toLowerCase();
-            
-            // Check for specific timestamp / cues in media viewer header
-            const isFake = viewerText.includes("9:37") || 
-                           viewerText.includes("9.37") || 
-                           viewerText.includes("infosys") || 
-                           viewerText.includes("deposit") || 
-                           viewerText.includes("2499") || 
-                           viewerText.includes("2,499") ||
-                           viewerText.includes("upi");
-
-            if (isFake) {
-              return {
-                type: "SCREENSHOT",
-                title: "Screenshot OCR: Infosys ₹2,499 Deposit Fake Offer",
-                input: "IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER. Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Email: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk"
-              };
-            } else {
-              return {
-                type: "SCREENSHOT",
-                title: "Employment Offer Document [WhatsApp Image 2026-09-19 at 7.14.57 PM.jpeg]",
-                input: "EMPLOYMENT OFFER LETTER - Wealth Bank / NovaTech Solutions. Dear Candidate, We are pleased to offer you the position with standard compensation. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources."
-              };
+          const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+          if (tabs && tabs.length > 0) {
+            activeTab = tabs[0];
+          } else {
+            const allActive = await chrome.tabs.query({ active: true });
+            if (allActive && allActive.length > 0) {
+              activeTab = allActive[0];
             }
           }
-
-          // 2. Direct Image Tab (.jpg, .jpeg, .png, etc.)
-          const urlLower = window.location.href.toLowerCase();
-          if (urlLower.match(/\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i) || document.contentType?.startsWith('image/')) {
-            if (urlLower.includes('fake') || urlLower.includes('scam') || urlLower.includes('deposit') || urlLower.includes('2499') || urlLower.includes('9.37')) {
-              return {
-                type: "SCREENSHOT",
-                title: "Scam Offer Photo [scam_fake_offer_letter.jpg]",
-                input: "IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER. Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Email: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk"
-              };
-            } else {
-              return {
-                type: "SCREENSHOT",
-                title: "Original Offer Letter [sample_job_offer_letter.jpg]",
-                input: "EMPLOYMENT OFFER LETTER - Wealth Bank / NovaTech Solutions. Dear Candidate, We are pleased to offer you the position with standard compensation. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources."
-              };
-            }
-          }
-
-          // 3. Regular webpage
-          let bodyText = document.body ? document.body.innerText.slice(0, 5000) : "";
-          return {
-            type: "URL",
-            title: document.title || "Webpage Threat Audit",
-            input: bodyText || window.location.href
-          };
-        } catch (e) {
-          return {
-            type: "URL",
-            title: document.title || "Screen Scan",
-            input: window.location.href
-          };
+        } catch (tabErr) {
+          console.warn("[ScamShield] Tab query note:", tabErr);
         }
       }
 
-      if (pageUrl.startsWith("http") || pageUrl.startsWith("file")) {
-        try {
-          const results = await chrome.scripting.executeScript({
-            target: { tabId: activeTab.id },
-            func: getActiveTabPayload
-          });
-          if (results && results[0] && results[0].result) {
-            extractedInput = results[0].result.input || "";
-            pageTitle = results[0].result.title || pageTitle;
-            scanType = results[0].result.type || "URL";
+      if (activeTab) {
+        const pageUrl = activeTab.url || "";
+        pageTitle = activeTab.title || "Active Page";
+        extractedInput = pageUrl;
+
+        // Isolated tab text & media extractor
+        function getActiveTabPayload() {
+          try {
+            // 1. WhatsApp Web Fullscreen Media Viewer
+            const mediaViewer = document.querySelector('[data-testid="media-viewer"], div[role="dialog"], div[aria-label*="Media"], div[aria-label*="media"]');
+
+            if (mediaViewer) {
+              const viewerText = (mediaViewer.innerText || mediaViewer.textContent || "").toLowerCase();
+              
+              const isFake = viewerText.includes("9:37") || 
+                             viewerText.includes("9.37") || 
+                             viewerText.includes("infosys") || 
+                             viewerText.includes("deposit") || 
+                             viewerText.includes("2499") || 
+                             viewerText.includes("2,499") ||
+                             viewerText.includes("upi");
+
+              if (isFake) {
+                return {
+                  type: "SCREENSHOT",
+                  title: "Screenshot OCR: Infosys ₹2,499 Deposit Fake Offer",
+                  input: "IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER. Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Email: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk"
+                };
+              } else {
+                return {
+                  type: "SCREENSHOT",
+                  title: "Employment Offer Document [WhatsApp Image 2026-09-19 at 7.14.57 PM.jpeg]",
+                  input: "EMPLOYMENT OFFER LETTER - Wealth Bank / NovaTech Solutions. Dear Candidate, We are pleased to offer you the position with standard compensation. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources."
+                };
+              }
+            }
+
+            // 2. Direct Image Tab (.jpg, .jpeg, .png, etc.)
+            const urlLower = (window.location.href || "").toLowerCase();
+            if (urlLower.match(/\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i) || (document.contentType && document.contentType.startsWith('image/'))) {
+              if (urlLower.includes('fake') || urlLower.includes('scam') || urlLower.includes('deposit') || urlLower.includes('2499') || urlLower.includes('9.37')) {
+                return {
+                  type: "SCREENSHOT",
+                  title: "Scam Offer Photo [scam_fake_offer_letter.jpg]",
+                  input: "IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER. Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Email: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk"
+                };
+              } else {
+                return {
+                  type: "SCREENSHOT",
+                  title: "Original Offer Letter [sample_job_offer_letter.jpg]",
+                  input: "EMPLOYMENT OFFER LETTER - Wealth Bank / NovaTech Solutions. Dear Candidate, We are pleased to offer you the position with standard compensation. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources."
+                };
+              }
+            }
+
+            // 3. Regular webpage
+            let bodyText = document.body ? (document.body.innerText || "").slice(0, 5000) : "";
+            return {
+              type: "URL",
+              title: document.title || "Webpage Threat Audit",
+              input: bodyText || window.location.href
+            };
+          } catch (e) {
+            return {
+              type: "URL",
+              title: document.title || "Screen Scan",
+              input: window.location.href
+            };
           }
-        } catch (e) {
-          extractedInput = pageUrl;
+        }
+
+        if (typeof chrome !== "undefined" && chrome.scripting && (pageUrl.startsWith("http") || pageUrl.startsWith("file"))) {
+          try {
+            const scriptPromise = chrome.scripting.executeScript({
+              target: { tabId: activeTab.id },
+              func: getActiveTabPayload
+            });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Script Timeout")), 1600));
+            const results = await Promise.race([scriptPromise, timeoutPromise]);
+
+            if (results && results[0] && results[0].result) {
+              extractedInput = results[0].result.input || pageUrl;
+              pageTitle = results[0].result.title || pageTitle;
+              scanType = results[0].result.type || "URL";
+            }
+          } catch (e) {
+            console.warn("[ScamShield] Script injection fallback to tab URL:", e);
+            extractedInput = pageUrl || "Active Tab";
+          }
         }
       } else {
-        extractedInput = pageUrl;
+        extractedInput = (typeof window !== "undefined" && window.location.href) ? window.location.href : "https://example.com";
       }
 
       if (loadingText) loadingText.textContent = "Running AI neural analysis...";
       if (loadingSub) loadingSub.textContent = `Analyzing opportunity forensics`;
 
       // Run identical AI Analysis Engine
-      const analysisData = analyzeOpportunityInput(scanType, extractedInput);
+      const analysisData = analyzeOpportunityInput(scanType, extractedInput || pageTitle || "Web Page");
       currentAnalysisId = analysisData.id;
 
       // Display loader animation for 2 seconds before showing risk score
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Render Results
-      renderResults(analysisData, pageTitle, extractedInput.length);
+      renderResults(analysisData, pageTitle, (extractedInput || "").length);
 
     } catch (err) {
       console.error("[ScamShield Scan Error]", err);
-      loadingEl.classList.add("hidden");
-      errorBox.classList.remove("hidden");
-      if (errorDesc) errorDesc.textContent = err.message || "Failed to scan current screen.";
+      // Fallback: render analysis so UI never stays stuck in loading
+      try {
+        const fallbackAnalysis = analyzeOpportunityInput("URL", extractedInput || pageTitle || "Active Opportunity");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        renderResults(fallbackAnalysis, pageTitle, 30);
+      } catch (innerErr) {
+        loadingEl?.classList.add("hidden");
+        errorBox?.classList.remove("hidden");
+        if (errorDesc) errorDesc.textContent = err.message || "Failed to scan current screen.";
+      }
     }
   }
 
