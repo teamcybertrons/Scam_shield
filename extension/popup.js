@@ -1,7 +1,8 @@
 // ScamShield Manifest V3 Extension Controller (100% Synced with Website AI Engine)
 const API_BASE_URL = "http://localhost:8000/api";
 
-document.addEventListener("DOMContentLoaded", async () => {
+function initPopup() {
+  console.log("[ScamShield Extension] Popup Initialized");
   const idleCard = document.getElementById("idleCard");
   const loadingEl = document.getElementById("loading");
   const loadingText = document.getElementById("loadingText");
@@ -424,21 +425,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Event Listeners
+  // Direct & Delegated Event Listeners
   if (scanScreenBtn) {
-    scanScreenBtn.addEventListener("click", () => {
+    scanScreenBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      console.log("[ScamShield] Scan Current Screen clicked");
       scanCurrentScreen();
     });
   }
 
   if (scanCustomBtn && customUrlInput) {
-    scanCustomBtn.addEventListener("click", () => {
+    scanCustomBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       const inputVal = customUrlInput.value.trim();
       if (inputVal) {
         idleCard?.classList.add("hidden");
-        loadingEl.classList.remove("hidden");
-        resultEl.classList.add("hidden");
-        errorBox.classList.add("hidden");
+        loadingEl?.classList.remove("hidden");
+        resultEl?.classList.add("hidden");
+        errorBox?.classList.add("hidden");
         const analysis = analyzeOpportunityInput('URL', inputVal);
         setTimeout(() => {
           renderResults(analysis, inputVal.slice(0, 30), inputVal.length);
@@ -454,16 +458,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (retryBtn) {
-    retryBtn.addEventListener("click", () => scanCurrentScreen());
+    retryBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      scanCurrentScreen();
+    });
   }
 
   if (openReportBtn) {
-    openReportBtn.addEventListener("click", () => {
-      if (currentAnalysisId) {
-        chrome.tabs.create({ url: `http://localhost:5173/?report=${currentAnalysisId}` });
+    openReportBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.create) {
+        if (currentAnalysisId) {
+          chrome.tabs.create({ url: `http://localhost:5173/?report=${currentAnalysisId}` });
+        } else {
+          chrome.tabs.create({ url: `http://localhost:5173` });
+        }
       } else {
-        chrome.tabs.create({ url: `http://localhost:5173` });
+        window.open(currentAnalysisId ? `http://localhost:5173/?report=${currentAnalysisId}` : `http://localhost:5173`, '_blank');
       }
     });
   }
-});
+
+  // Global event delegation fallback
+  document.addEventListener("click", (e) => {
+    const target = e.target;
+    if (target && (target.id === "scanScreenBtn" || target.closest("#scanScreenBtn"))) {
+      e.preventDefault();
+      scanCurrentScreen();
+    }
+  });
+}
+
+// Support both immediate execution and DOMContentLoaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPopup);
+} else {
+  initPopup();
+}
