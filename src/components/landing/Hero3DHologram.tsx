@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { ShieldCheck, Activity, Lock, Cpu, Zap, Wifi } from 'lucide-react';
 
 interface Particle {
   x: number;
@@ -34,7 +33,7 @@ export const Hero3DHologram: React.FC = () => {
 
     // Generate 3D sphere particles
     const particleCount = 280;
-    const radius = Math.min(width, height) * 0.36;
+    const radius = Math.min(width, height) * 0.38;
     const particles: Particle[] = [];
 
     const colors = [
@@ -78,12 +77,26 @@ export const Hero3DHologram: React.FC = () => {
     let angleY = 0;
     let scanY = -radius;
     let scanDirection = 1;
+    let targetAngleX = 0.15;
+    let targetAngleY = 0;
+
+    // Responsive 3D cursor movement
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const nx = (e.clientX - rect.left) / rect.width - 0.5;
+      const ny = (e.clientY - rect.top) / rect.height - 0.5;
+      targetAngleY = nx * 1.6;
+      targetAngleX = -ny * 1.2;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth constant auto-rotation (no cursor follow)
-      angleY += 0.006;
+      // Continuous rotation + smooth cursor follow
+      angleY += (targetAngleY + 0.005 - angleY) * 0.06;
+      angleX += (targetAngleX - angleX) * 0.06;
 
       // Scan laser oscillation
       scanY += scanDirection * 1.5;
@@ -137,8 +150,8 @@ export const Hero3DHologram: React.FC = () => {
         centerY,
         radius * 1.1
       );
-      grad.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
-      grad.addColorStop(0.5, 'rgba(99, 102, 241, 0.05)');
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.14)');
+      grad.addColorStop(0.5, 'rgba(99, 102, 241, 0.06)');
       grad.addColorStop(1, 'rgba(3, 7, 18, 0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -146,12 +159,12 @@ export const Hero3DHologram: React.FC = () => {
       ctx.fill();
 
       // Draw Orbiting 3D Latitude/Longitude Rings
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
       ctx.lineWidth = 1;
       
       // Equator Ring
       ctx.beginPath();
-      for (let a = 0; a <= Math.PI * 2; a += 0.1) {
+      for (let a = 0; a <= Math.PI * 2; a += 0.08) {
         const rx = radius * Math.cos(a);
         const rz = radius * Math.sin(a);
         const rx1 = rx * cosY - rz * sinY;
@@ -176,14 +189,14 @@ export const Hero3DHologram: React.FC = () => {
         scanPixelY
       );
       scanGradient.addColorStop(0, 'rgba(56, 189, 248, 0)');
-      scanGradient.addColorStop(0.5, 'rgba(56, 189, 248, 0.65)');
+      scanGradient.addColorStop(0.5, 'rgba(56, 189, 248, 0.7)');
       scanGradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
       
       ctx.strokeStyle = scanGradient;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(centerX - radius * 0.9 * scanScale, scanPixelY);
-      ctx.lineTo(centerX + radius * 0.9 * scanScale, scanPixelY);
+      ctx.moveTo(centerX - radius * 0.95 * scanScale, scanPixelY);
+      ctx.lineTo(centerX + radius * 0.95 * scanScale, scanPixelY);
       ctx.stroke();
 
       // Draw interconnected network lines for closest nodes
@@ -193,8 +206,8 @@ export const Hero3DHologram: React.FC = () => {
           const p1 = projected[i];
           const p2 = projected[j];
           const dist = Math.hypot(p1.x2d - p2.x2d, p1.y2d - p2.y2d);
-          if (dist < 48 && p1.z > -radius * 0.5 && p2.z > -radius * 0.5) {
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.25 * p1.alpha * (1 - dist / 48)})`;
+          if (dist < 50 && p1.z > -radius * 0.5 && p2.z > -radius * 0.5) {
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.28 * p1.alpha * (1 - dist / 50)})`;
             ctx.beginPath();
             ctx.moveTo(p1.x2d, p1.y2d);
             ctx.lineTo(p2.x2d, p2.y2d);
@@ -211,9 +224,9 @@ export const Hero3DHologram: React.FC = () => {
         ctx.arc(p.x2d, p.y2d, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Extra glow on frontmost particles
+        // Extra specular glow on frontmost particles
         if (p.z > radius * 0.3) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
           ctx.beginPath();
           ctx.arc(p.x2d, p.y2d, p.size * 0.5, 0, Math.PI * 2);
           ctx.fill();
@@ -245,10 +258,10 @@ export const Hero3DHologram: React.FC = () => {
           const pulse = (Date.now() / 300 + i) % 3;
           ctx.strokeStyle =
             node.type === 'safe'
-              ? 'rgba(52, 211, 153, 0.6)'
+              ? 'rgba(52, 211, 153, 0.7)'
               : node.type === 'scam'
-              ? 'rgba(244, 63, 94, 0.8)'
-              : 'rgba(251, 191, 36, 0.8)';
+              ? 'rgba(244, 63, 94, 0.85)'
+              : 'rgba(251, 191, 36, 0.85)';
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.arc(px, py, 4 + pulse * 3, 0, Math.PI * 2);
@@ -265,7 +278,7 @@ export const Hero3DHologram: React.FC = () => {
           ctx.arc(px, py, 4, 0, Math.PI * 2);
           ctx.fill();
 
-          // Little label pill
+          // Label pill
           ctx.font = '10px "JetBrains Mono", monospace';
           ctx.fillStyle = '#f8fafc';
           ctx.fillText(node.label, px + 10, py - 4);
@@ -279,16 +292,17 @@ export const Hero3DHologram: React.FC = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div className="relative w-full h-[450px] sm:h-[520px] flex items-center justify-center">
-      {/* 3D Holographic Canvas */}
+    <div className="relative w-full h-[450px] sm:h-[520px] flex items-center justify-center cursor-grab active:cursor-grabbing">
+      {/* 3D Holographic Canvas with Cursor Interaction */}
       <canvas
         ref={canvasRef}
-        className="w-full h-full pointer-events-none"
+        className="w-full h-full pointer-events-auto"
       />
     </div>
   );
