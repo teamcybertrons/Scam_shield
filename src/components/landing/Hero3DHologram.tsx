@@ -74,31 +74,16 @@ export const Hero3DHologram: React.FC = () => {
       { lat: -0.2, lon: -0.7, label: 'OCR Verified Letter', type: 'safe' },
     ];
 
-    let angleX = 0;
+    let angleX = 0.15;
     let angleY = 0;
     let scanY = -radius;
     let scanDirection = 1;
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetAngleX = 0;
-    let targetAngleY = 0;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const nx = (e.clientX - rect.left) / rect.width - 0.5;
-      const ny = (e.clientY - rect.top) / rect.height - 0.5;
-      targetAngleY = nx * 0.8;
-      targetAngleX = -ny * 0.8;
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth mouse follow
-      angleY += (targetAngleY + 0.004 - angleY) * 0.05;
-      angleX += (targetAngleX - angleX) * 0.05;
+      // Smooth constant auto-rotation (no cursor follow)
+      angleY += 0.006;
 
       // Scan laser oscillation
       scanY += scanDirection * 1.5;
@@ -294,7 +279,6 @@ export const Hero3DHologram: React.FC = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -304,7 +288,7 @@ export const Hero3DHologram: React.FC = () => {
       {/* 3D Holographic Canvas */}
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing pointer-events-auto"
+        className="w-full h-full pointer-events-none"
       />
     </div>
   );
