@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     scoreEl.textContent = `${data.riskScore}/100`;
     levelEl.textContent = `${data.riskLevel} RISK`;
     document.getElementById("confidence").textContent = `${data.confidence}% Confidence`;
+    if (document.getElementById("summaryText")) {
+      document.getElementById("summaryText").textContent = data.summary || "Forensic analysis completed.";
+    }
 
     // Colors
     if (data.riskScore >= 80) {
