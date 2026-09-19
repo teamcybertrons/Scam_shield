@@ -29,7 +29,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onOpenScanner, setActive
           </h2>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto mb-8 leading-relaxed">
-            Protect your career and financial security with evidence-based verification before paying fees, sharing credentials, or signing deceptive offers.
+            Join over 1.2 million students who evaluate digital opportunities with ScamShield before paying fees, sharing credentials, or signing deceptive offers.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

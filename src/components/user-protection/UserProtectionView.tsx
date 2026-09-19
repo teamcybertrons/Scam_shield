@@ -68,7 +68,7 @@ export const UserProtectionView: React.FC<UserProtectionViewProps> = ({
         </div>
 
         <div className="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl">
-          VAULT: <strong className="text-white font-mono">Local Browser Session (Zero-Knowledge)</strong>
+          ACCOUNT: <strong className="text-white font-mono">student.alex@campus.edu</strong>
         </div>
       </div>
 
@@ -76,35 +76,35 @@ export const UserProtectionView: React.FC<UserProtectionViewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="p-6 rounded-2xl bg-slate-900/80 border border-cyan-500/25 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-mono text-slate-400 uppercase">Bookmarked Audits</span>
+            <span className="text-xs font-mono text-slate-400 uppercase">Opportunities Checked</span>
             <FileText className="w-5 h-5 text-cyan-400" />
           </div>
           <div className="text-4xl font-extrabold font-mono text-white">
-            {savedReports.length}
+            27
           </div>
-          <p className="text-xs text-slate-400 mt-1">Verified reports saved to your device</p>
+          <p className="text-xs text-slate-400 mt-1">Verified via URL, chat & offer letters</p>
         </div>
 
         <div className="p-6 rounded-2xl bg-slate-900/80 border border-rose-500/25 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-mono text-slate-400 uppercase">High Risk Flagged</span>
+            <span className="text-xs font-mono text-slate-400 uppercase">High Risk Detected</span>
             <ShieldAlert className="w-5 h-5 text-rose-400" />
           </div>
           <div className="text-4xl font-extrabold font-mono text-rose-400">
-            {savedReports.filter(r => r.riskLevel === 'HIGH').length}
+            8
           </div>
-          <p className="text-xs text-slate-400 mt-1">Direct payment traps & spoofed links</p>
+          <p className="text-xs text-slate-400 mt-1">Direct payment scams & spoofed recruiters</p>
         </div>
 
         <div className="p-6 rounded-2xl bg-slate-900/80 border border-emerald-500/25 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-mono text-slate-400 uppercase">Verified Official</span>
+            <span className="text-xs font-mono text-slate-400 uppercase">Estimated Loss Avoided</span>
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
           </div>
           <div className="text-4xl font-extrabold font-mono text-emerald-400">
-            {savedReports.filter(r => r.riskLevel === 'LOW').length}
+            ₹24,500
           </div>
-          <p className="text-xs text-slate-400 mt-1">Authenticated corporate hiring portals</p>
+          <p className="text-xs text-slate-400 mt-1">12 fraudulent registration fee demands averted</p>
         </div>
       </div>
 

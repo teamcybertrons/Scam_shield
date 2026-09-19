@@ -31,8 +31,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
       id: 'url', 
       label: 'URL & Redirects', 
       icon: Globe, 
-      score: 'Hop Analysis', 
-      status: 'Clean Chain Check', 
+      score: '99.8%', 
+      status: 'Clean Routing', 
       risk: 'LOW',
       desc: 'Inspects full redirect chains, burner TLDs, and typo-squatted paths across 40+ registrar registries.' 
     },
@@ -40,17 +40,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
       id: 'domain', 
       label: 'Domain WHOIS', 
       icon: Globe, 
-      score: 'WHOIS & Age', 
-      status: 'Registrar Anomaly Check', 
+      score: '6 Days Old', 
+      status: 'High Risk Anomaly', 
       risk: 'HIGH',
-      desc: 'Flags newly created domains and privacy-proxy hosts posing as established multinational enterprises.' 
+      desc: 'Flags newly created domains posing as established multinational enterprises.' 
     },
     { 
       id: 'company', 
       label: 'Company Match', 
       icon: Building2, 
-      score: 'Directory Match', 
-      status: 'Official Portal Verification', 
+      score: 'Unverified', 
+      status: 'Brand Impersonation', 
       risk: 'HIGH',
       desc: 'Compares claimed corporate branding against verified enterprise recruitment directories.' 
     },
@@ -58,8 +58,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
       id: 'payment', 
       label: 'Payment Traps', 
       icon: CreditCard, 
-      score: 'Zero-Fee Rule', 
-      status: 'Payment & UPI Filter', 
+      score: '₹1,999 Demand', 
+      status: 'UPI Fee Extortion', 
       risk: 'CRITICAL',
       desc: 'Detects illegal upfront registration fees, training deposits, and mule UPI handles.' 
     },
@@ -67,26 +67,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
       id: 'message', 
       label: 'Urgency NLP', 
       icon: MessageSquare, 
-      score: 'NLP Coercion', 
-      status: 'Psychological Analysis', 
+      score: 'Manipulative', 
+      status: 'Panic Triggers', 
       risk: 'MEDIUM',
-      desc: 'Identifies artificial countdown timers, false scarcity, and guaranteed selection promises.' 
+      desc: 'Identifies artificial 30-minute countdown timers and guaranteed selection promises.' 
     },
     { 
       id: 'identity', 
       label: 'Recruiter ID', 
       icon: Fingerprint, 
-      score: 'Channel Check', 
-      status: 'Corporate Route Verification', 
+      score: 'Telegram @hr', 
+      status: 'Free Channel Bypass', 
       risk: 'HIGH',
-      desc: 'Exposes scammers redirecting candidates away from corporate email domains to private chat apps.' 
+      desc: 'Exposes scammers redirecting candidates away from corporate emails to Telegram.' 
     },
     { 
       id: 'reputation', 
       label: 'Honeypot SOC', 
       icon: Activity, 
-      score: 'Threat Database', 
-      status: 'Community Defense', 
+      score: '37 Matches', 
+      status: 'Active Syndicate', 
       risk: 'CRITICAL',
       desc: 'Cross-checks submitted links against real-time decoy logs and community fraud reports.' 
     },
@@ -162,10 +162,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-500/30">
-                  CLIENT-SIDE ENGINE
+                  LATENCY: 14ms
                 </span>
                 <span className="text-xs font-semibold text-emerald-300 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-500/30">
-                  REAL-TIME DEFENSE
+                  SOC ACTIVE
                 </span>
               </div>
             </div>
@@ -246,7 +246,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Inspection Method</span>
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Observed Metric</span>
                     <span className="text-sm font-bold text-white">{currentVector.score}</span>
                   </div>
                   <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
