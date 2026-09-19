@@ -22,10 +22,10 @@ import { SecurityCenterView } from './components/security-center/SecurityCenterV
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
-  const [currentResult, setCurrentResult] = useState<AnalysisResult>(mockCases[0]);
+  const [currentResult, setCurrentResult] = useState<AnalysisResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanningTarget, setScanningTarget] = useState<string>(mockCases[0].targetValue);
-  const [savedReports, setSavedReports] = useState<AnalysisResult[]>([mockCases[0]]);
+  const [scanningTarget, setScanningTarget] = useState<string>('');
+  const [savedReports, setSavedReports] = useState<AnalysisResult[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -45,7 +45,9 @@ export const App: React.FC = () => {
   const handleScanCompleted = () => {
     setIsScanning(false);
     setActiveTab('report');
-    showToast(`Security Audit Generated: ${currentResult.id}`);
+    if (currentResult) {
+      showToast(`Security Audit Generated: ${currentResult.id}`);
+    }
   };
 
   const handleSaveReport = (report: AnalysisResult) => {

@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 interface AnalysisReportViewProps {
-  result: AnalysisResult;
+  result: AnalysisResult | null;
   onBackToScanner: () => void;
   setActiveTab: (tab: ActiveTab) => void;
   onSaveReport?: (result: AnalysisResult) => void;
@@ -64,7 +64,7 @@ export const AnalysisReportView: React.FC<AnalysisReportViewProps> = ({
 
   const handleSave = () => {
     setIsSaved(true);
-    if (onSaveReport) {
+    if (onSaveReport && result) {
       onSaveReport(result);
     }
   };
@@ -72,6 +72,26 @@ export const AnalysisReportView: React.FC<AnalysisReportViewProps> = ({
   const handlePrint = () => {
     window.print();
   };
+
+  if (!result) {
+    return (
+      <div className="max-w-xl mx-auto py-20 px-4 text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-white">No Active Security Report</h2>
+        <p className="text-xs text-slate-400">
+          You have not analyzed any opportunities in this session yet. Submit a link or text in the scanner to generate an authentic audit report.
+        </p>
+        <button
+          onClick={onBackToScanner}
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition cursor-pointer"
+        >
+          Open Threat Scanner
+        </button>
+      </div>
+    );
+  }
 
   const { breakdown, verification } = result;
 

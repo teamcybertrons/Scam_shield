@@ -1,49 +1,52 @@
 import React from 'react';
 import { AnimatedCounter } from '../common/AnimatedCounter';
-import { ShieldCheck, Database, GlobeLock, Zap } from 'lucide-react';
+import { ShieldCheck, Database, GlobeLock, Zap, CheckCircle2, Lock } from 'lucide-react';
 
 export const TrustMetrics: React.FC = () => {
   const metrics = [
     {
-      value: 1240000,
-      suffix: '+',
-      label: 'Opportunities Analyzed',
-      subtext: 'Student job links, internships & offers screened',
+      value: 7,
+      suffix: ' Vectors',
+      decimals: 0,
+      label: 'Multi-Vector Inspection',
+      subtext: 'Parallel DNS, WHOIS, UPI detection, and NLP urgency engines',
       icon: ShieldCheck,
       color: 'text-cyan-400',
       border: 'border-cyan-500/25',
       glow: 'shadow-cyan-500/5'
     },
     {
-      value: 42890,
-      suffix: '+',
-      label: 'Threat Indicators',
-      subtext: 'Phishing forms, fraudulent UPIs & burner handles',
+      value: 50,
+      suffix: '+ Portals',
+      decimals: 0,
+      label: 'Enterprise Portals Indexed',
+      subtext: 'Direct cross-referencing with verified global corporate careers registers',
       icon: Database,
-      color: 'text-rose-400',
-      border: 'border-rose-500/25',
-      glow: 'shadow-rose-500/5'
+      color: 'text-sky-400',
+      border: 'border-sky-500/25',
+      glow: 'shadow-sky-500/5'
     },
     {
-      value: 18450,
-      suffix: '+',
-      label: 'Suspicious Domains',
-      subtext: 'Typo-squatted domains blocked before applications',
-      icon: GlobeLock,
-      color: 'text-amber-400',
-      border: 'border-amber-500/25',
-      glow: 'shadow-amber-500/5'
-    },
-    {
-      value: 99.2,
+      value: 100,
       suffix: '%',
-      decimals: 1,
-      label: 'Analysis Availability',
-      subtext: 'Sub-second real-time multi-vector intelligence pipeline',
-      icon: Zap,
+      decimals: 0,
+      label: 'Zero Data Retention',
+      subtext: 'Client-side privacy pipeline with zero storage of IDs, OTPs, or resumes',
+      icon: Lock,
       color: 'text-emerald-400',
       border: 'border-emerald-500/25',
       glow: 'shadow-emerald-500/5'
+    },
+    {
+      value: 1,
+      suffix: ' Sec',
+      decimals: 0,
+      label: 'Sub-Second Deep Scan',
+      subtext: 'Instant heuristic risk computation and forensic evidence breakdown',
+      icon: Zap,
+      color: 'text-amber-400',
+      border: 'border-amber-500/25',
+      glow: 'shadow-amber-500/5'
     }
   ];
 
@@ -51,17 +54,20 @@ export const TrustMetrics: React.FC = () => {
     <section className="py-14 border-y border-white/5 bg-[#040814] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Subtle Section Note */}
+        {/* Section Header */}
         <div className="flex items-center justify-between mb-8 pb-3 border-b border-white/5">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Real-Time Defense Telemetry
+            System Architecture & Defense Specifications
           </span>
-          <span className="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-md border border-cyan-500/30">
-            UPDATED SECONDS AGO
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-md border border-emerald-500/30">
+              PIPELINE OPERATIONAL
+            </span>
+          </div>
         </div>
 
-        {/* 4 Premium Cards */}
+        {/* 4 Authentic Architecture Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {metrics.map((item, idx) => {
             const Icon = item.icon;
@@ -75,7 +81,7 @@ export const TrustMetrics: React.FC = () => {
                     <Icon className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    LIVE METRIC
+                    SPECIFICATION
                   </span>
                 </div>
 
