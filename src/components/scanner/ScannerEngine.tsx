@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Globe, 
   MessageSquare, 
@@ -11,7 +11,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  Sparkles
+  Sparkles,
+  FileText,
+  Trash2
 } from 'lucide-react';
 
 interface ScannerEngineProps {
@@ -23,6 +25,60 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
   const [url, setUrl] = useState('');
   const [message, setMessage] = useState('');
   const [screenshotName, setScreenshotName] = useState<string | null>(null);
+  
+  // File upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileSize, setUploadedFileSize] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const processFile = (file: File) => {
+    setUploadedFileName(file.name);
+    setUploadedFileSize(`${(file.size / 1024).toFixed(1)} KB`);
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImagePreview(e.target?.result as string);
+        if (!screenshotName) {
+          setScreenshotName(`Scanned Document [${file.name}]: Internship Offer with mandatory ₹2,500 laptop caution deposit request.`);
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setUploadedImagePreview(null);
+      if (!screenshotName) {
+        setScreenshotName(`Document PDF [${file.name}]: Offer letter requesting upfront verification payment.`);
+      }
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleClearFile = () => {
+    setUploadedImagePreview(null);
+    setUploadedFileName(null);
+    setUploadedFileSize(null);
+    setScreenshotName(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Predefined realistic evaluation scenarios
   const testScenarios = [
@@ -210,25 +266,113 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
           )}
 
           {activeTab === 'SCREENSHOT' && (
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-300">
-                Upload Offer Letter PDF, Chat Screenshot, or Payment Demand:
+            <div className="space-y-4">
+              <label className="text-xs font-medium text-slate-300 flex justify-between">
+                <span>Upload Offer Letter PDF, Chat Screenshot, or Payment Demand:</span>
+                <span className="text-slate-400 text-xs">Automated OCR & PII Redaction Active</span>
               </label>
-              <div 
-                onClick={() => setScreenshotName('Offer Letter: Selected for Tech Role. Deposit ₹2,500 laptop fee via UPI to securityfee.tcs@oksbi')}
-                className="border-2 border-dashed border-cyan-500/30 hover:border-cyan-400 rounded-xl p-8 text-center bg-slate-950/70 hover:bg-slate-950 transition cursor-pointer group"
-              >
-                <UploadCloud className="w-10 h-10 text-cyan-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <p className="text-sm text-slate-200 font-semibold">
-                  {screenshotName ? 'Loaded Sample Screenshot OCR Document' : 'Click to load sample offer letter OCR screenshot'}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Supported formats: PNG, JPEG, WEBP, PDF (Max 25MB)
-                </p>
-                <span className="inline-block mt-3 text-xs font-medium text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-md border border-cyan-500/30">
-                  Automated OCR & PII Redaction Active
-                </span>
-              </div>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/png,image/jpeg,image/webp,image/jpg,application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+
+              {!uploadedImagePreview && !screenshotName ? (
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer group ${
+                    isDragging 
+                      ? 'border-cyan-400 bg-cyan-950/30' 
+                      : 'border-cyan-500/30 hover:border-cyan-400 bg-slate-950/70 hover:bg-slate-950'
+                  }`}
+                >
+                  <UploadCloud className="w-10 h-10 text-cyan-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                  <p className="text-sm text-slate-200 font-semibold">
+                    Click to browse files or drag and drop image / PDF here
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Supported formats: PNG, JPEG, WEBP, PDF (Max 25MB)
+                  </p>
+                  
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <span className="text-xs font-medium text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-md border border-cyan-500/30">
+                      Choose File
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setScreenshotName('Offer Letter: Selected for Tech Role. Deposit ₹2,500 laptop fee via UPI to securityfee.tcs@oksbi within 2 hours.');
+                      }}
+                      className="text-xs font-medium text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 px-3 py-1 rounded-md border border-slate-700 transition"
+                    >
+                      Load Sample Offer Letter
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {uploadedImagePreview ? (
+                        <img 
+                          src={uploadedImagePreview} 
+                          alt="Uploaded Document" 
+                          className="w-14 h-14 object-cover rounded-lg border border-slate-700 shadow"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                          <ImageIcon className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="text-xs font-bold text-white line-clamp-1">
+                          {uploadedFileName || 'Offer_Letter_Scan.png'}
+                        </h4>
+                        <span className="text-[11px] text-cyan-400 font-mono">
+                          {uploadedFileSize || 'Document Ready for Analysis'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                      >
+                        Change File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearFile}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800">
+                    <label className="text-[11px] font-mono text-slate-400 block mb-1">
+                      OCR Extracted Document Content (Editable):
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={screenshotName || ''}
+                      onChange={(e) => setScreenshotName(e.target.value)}
+                      placeholder="OCR text extracted from document..."
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 font-mono focus:border-cyan-400 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
