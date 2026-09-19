@@ -14,6 +14,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { ActiveTab, AnalysisResult } from '../../types';
+import { Card3DTilt } from '../common/Card3DTilt';
 
 interface WhatsAppBotViewProps {
   onOpenReport: (result?: AnalysisResult) => void;
@@ -132,28 +133,30 @@ export const WhatsAppBotView: React.FC<WhatsAppBotViewProps> = ({ onOpenReport }
       {/* Main Grid: Real Screenshot Showcase + Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-5xl mx-auto">
         
-        {/* Left: Real Screenshot Showcase */}
+        {/* Left: Real Screenshot Showcase with 3D Tilt */}
         <div className="lg:col-span-6 flex flex-col items-center">
-          <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative group border border-slate-800 bg-slate-900">
-            {/* Actual Screenshot Image */}
-            <div 
-              onClick={() => setIsZoomed(true)}
-              className="relative cursor-zoom-in group-hover:border-emerald-500/40 transition shadow-inner bg-black"
-            >
-              <img 
-                src="/whatsapp_bot_live_screenshot.jpg" 
-                alt="Live WhatsApp Bot Conversation Screenshot" 
-                className="w-full h-auto object-contain transition duration-300 group-hover:scale-[1.01]" 
-              />
+          <Card3DTilt maxTilt={10} scale={1.02} className="w-full max-w-sm">
+            <div className="w-full rounded-3xl overflow-hidden shadow-2xl relative group border border-emerald-500/30 bg-slate-900">
+              {/* Actual Screenshot Image */}
+              <div 
+                onClick={() => setIsZoomed(true)}
+                className="relative cursor-zoom-in group-hover:border-emerald-500/40 transition shadow-inner bg-black"
+              >
+                <img 
+                  src="/whatsapp_bot_live_screenshot.jpg" 
+                  alt="Live WhatsApp Bot Conversation Screenshot" 
+                  className="w-full h-auto object-contain transition duration-300 group-hover:scale-[1.01]" 
+                />
 
-              {/* Hover overlay hint */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center p-4">
-                <span className="text-xs text-white font-mono bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-700 shadow">
-                  🔍 Click to expand full screenshot
-                </span>
+                {/* Hover overlay hint */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center p-4">
+                  <span className="text-xs text-white font-mono bg-slate-900/95 px-3 py-1.5 rounded-lg border border-emerald-500/50 shadow-lg">
+                    🔍 Click to expand full screenshot
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          </Card3DTilt>
         </div>
 
         {/* Right: Live Connection, QR Code & Capabilities */}

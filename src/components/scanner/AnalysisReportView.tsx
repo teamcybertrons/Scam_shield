@@ -6,6 +6,7 @@ import {
 } from '../../types';
 import { RadialRiskMeter } from '../common/RadialRiskMeter';
 import { RiskBadge } from '../common/RiskBadge';
+import { Card3DTilt } from '../common/Card3DTilt';
 import { 
   ShieldAlert, 
   ShieldCheck, 
@@ -119,50 +120,52 @@ export const AnalysisReportView: React.FC<AnalysisReportViewProps> = ({
         </div>
       </div>
 
-      {/* SECTION 8: Header Banner */}
-      <div className="rounded-2xl bg-slate-900/90 border border-cyan-500/25 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
-                SCAMSHIELD SECURITY REPORT
-              </span>
-              <RiskBadge level={result.riskLevel} size="lg" />
+      {/* SECTION 8: Header Banner with 3D Tilt */}
+      <Card3DTilt maxTilt={6} scale={1.01}>
+        <div className="rounded-2xl bg-slate-900/90 border border-cyan-500/30 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
+                  SCAMSHIELD SECURITY REPORT
+                </span>
+                <RiskBadge level={result.riskLevel} size="lg" />
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {result.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-1">
+                <div>
+                  Report ID: <span className="text-white font-bold">{result.id}</span>
+                </div>
+                <span className="text-slate-700">•</span>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Analyzed: {result.analyzedAt}</span>
+                </div>
+                <span className="text-slate-700">•</span>
+                <div>
+                  Target: <span className="text-cyan-300 truncate inline-block max-w-xs align-bottom">{result.targetValue}</span>
+                </div>
+              </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {result.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400 pt-1">
-              <div>
-                Report ID: <span className="text-white font-bold">{result.id}</span>
-              </div>
-              <span className="text-slate-700">•</span>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Analyzed: {result.analyzedAt}</span>
-              </div>
-              <span className="text-slate-700">•</span>
-              <div>
-                Target: <span className="text-cyan-300 truncate inline-block max-w-xs align-bottom">{result.targetValue}</span>
-              </div>
+            {/* Radial Meter inside Header */}
+            <div className="flex justify-center lg:justify-end">
+              <RadialRiskMeter
+                score={result.riskScore}
+                riskLevel={result.riskLevel}
+                confidence={result.confidence}
+                size={180}
+              />
             </div>
-          </div>
 
-          {/* Radial Meter inside Header */}
-          <div className="flex justify-center lg:justify-end">
-            <RadialRiskMeter
-              score={result.riskScore}
-              riskLevel={result.riskLevel}
-              confidence={result.confidence}
-              size={180}
-            />
           </div>
-
         </div>
-      </div>
+      </Card3DTilt>
 
       {/* 2-Column Grid: Risk Breakdown Bars & Evidence Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { ActiveTab, AnalysisResult } from '../../types';
+import { Card3DTilt } from '../common/Card3DTilt';
 
 interface ExtensionMockupProps {
   onOpenReport: (result?: AnalysisResult) => void;
@@ -466,27 +467,29 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
           </div>
         </div>
 
-        {/* Premium High-Definition Screenshot Container */}
-        <div className="rounded-2xl bg-slate-950 border-2 border-cyan-500/40 shadow-2xl shadow-cyan-950/40 overflow-hidden relative group">
-          {/* Screenshot Image */}
-          <div 
-            onClick={() => setIsImageModalOpen(true)}
-            className="cursor-pointer overflow-hidden relative flex items-center justify-center bg-slate-950 p-2 sm:p-3"
-          >
-            <img 
-              src="/extension_whatsapp_live_screenshot.png" 
-              alt="ScamShield Browser Extension Live on WhatsApp Web" 
-              className="w-full h-auto rounded-xl object-contain shadow-2xl border border-slate-800/80 transition-transform duration-300 group-hover:scale-[1.01]"
-            />
-            
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8 pointer-events-none">
-              <span className="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono uppercase tracking-wider shadow-2xl flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                <span>Click to View High-Resolution Full Image</span>
-              </span>
+        {/* Premium High-Definition Screenshot Container with 3D Tilt */}
+        <Card3DTilt maxTilt={8} scale={1.01}>
+          <div className="rounded-2xl bg-slate-950 border-2 border-cyan-500/40 shadow-2xl shadow-cyan-950/40 overflow-hidden relative group">
+            {/* Screenshot Image */}
+            <div 
+              onClick={() => setIsImageModalOpen(true)}
+              className="cursor-pointer overflow-hidden relative flex items-center justify-center bg-slate-950 p-2 sm:p-3"
+            >
+              <img 
+                src="/extension_whatsapp_live_screenshot.png" 
+                alt="ScamShield Browser Extension Live on WhatsApp Web" 
+                className="w-full h-auto rounded-xl object-contain shadow-2xl border border-slate-800/80 transition-transform duration-300 group-hover:scale-[1.01]"
+              />
+              
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8 pointer-events-none">
+                <span className="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono uppercase tracking-wider shadow-2xl flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  <span>Click to View High-Resolution Full Image</span>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </Card3DTilt>
 
         {/* 3 Core Capabilities of the Live Extension */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

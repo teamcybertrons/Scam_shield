@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ThreatIndicator, AnalysisResult } from '../../types';
 import { RiskBadge } from '../common/RiskBadge';
 import { ScamShieldAPI } from '../../services/api';
+import { Card3DTilt } from '../common/Card3DTilt';
 import { 
   ShieldAlert, 
   Globe, 
@@ -185,60 +186,68 @@ export const ThreatDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Top 4 Real Metric Counters */}
+      {/* Top 4 Real Metric Counters with 3D Tilt */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Real Analyzed Scans */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 backdrop-blur-md shadow-xl transition hover:border-cyan-500/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-slate-400 uppercase">Actual Scans Stored</span>
-            <Layers className="w-5 h-5 text-cyan-400" />
+        <Card3DTilt maxTilt={8} scale={1.03} className="h-full">
+          <div className="h-full p-5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 backdrop-blur-md shadow-xl transition hover:border-cyan-400">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono text-slate-400 uppercase">Actual Scans Stored</span>
+              <Layers className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div className="text-3xl font-extrabold font-mono text-cyan-400 flex items-baseline gap-1.5">
+              <span>{stats.opportunitiesAnalyzed || realReports.length}</span>
+              <span className="text-xs text-cyan-300 font-normal font-sans">records</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Real audits performed across Web & WhatsApp</p>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-cyan-400 flex items-baseline gap-1.5">
-            <span>{stats.opportunitiesAnalyzed || realReports.length}</span>
-            <span className="text-xs text-cyan-300 font-normal font-sans">records</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Real audits performed across Web & WhatsApp</p>
-        </div>
+        </Card3DTilt>
 
         {/* Real Threat Indicators */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-rose-500/30 backdrop-blur-md shadow-xl transition hover:border-rose-500/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-slate-400 uppercase">Threat IOCs Cataloged</span>
-            <ShieldAlert className="w-5 h-5 text-rose-400" />
+        <Card3DTilt maxTilt={8} scale={1.03} className="h-full">
+          <div className="h-full p-5 rounded-2xl bg-slate-900/90 border border-rose-500/30 backdrop-blur-md shadow-xl transition hover:border-rose-400">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono text-slate-400 uppercase">Threat IOCs Cataloged</span>
+              <ShieldAlert className="w-5 h-5 text-rose-400" />
+            </div>
+            <div className="text-3xl font-extrabold font-mono text-rose-400 flex items-baseline gap-1.5">
+              <span>{stats.threatIndicators || realIocs.length}</span>
+              <span className="text-xs text-rose-300 font-normal font-sans">verified</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Malicious entities indexed in registry</p>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-rose-400 flex items-baseline gap-1.5">
-            <span>{stats.threatIndicators || realIocs.length}</span>
-            <span className="text-xs text-rose-300 font-normal font-sans">verified</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Malicious entities indexed in registry</p>
-        </div>
+        </Card3DTilt>
 
         {/* Real Suspicious Domains */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-amber-500/30 backdrop-blur-md shadow-xl transition hover:border-amber-500/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-slate-400 uppercase">Flagged Domains</span>
-            <Globe className="w-5 h-5 text-amber-400" />
+        <Card3DTilt maxTilt={8} scale={1.03} className="h-full">
+          <div className="h-full p-5 rounded-2xl bg-slate-900/90 border border-amber-500/30 backdrop-blur-md shadow-xl transition hover:border-amber-400">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono text-slate-400 uppercase">Flagged Domains</span>
+              <Globe className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="text-3xl font-extrabold font-mono text-amber-400 flex items-baseline gap-1.5">
+              <span>{stats.suspiciousDomains || 1}</span>
+              <span className="text-xs text-amber-300 font-normal font-sans">domains</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Typo-squatted and lookalike career endpoints</p>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-amber-400 flex items-baseline gap-1.5">
-            <span>{stats.suspiciousDomains || 1}</span>
-            <span className="text-xs text-amber-300 font-normal font-sans">domains</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Typo-squatted and lookalike career endpoints</p>
-        </div>
+        </Card3DTilt>
 
         {/* Honeypot & Payment Traps */}
-        <div className="p-5 rounded-2xl bg-slate-900/90 border border-purple-500/30 backdrop-blur-md shadow-xl transition hover:border-purple-500/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono text-slate-400 uppercase">Honeypot Decoy Matches</span>
-            <CheckCircle2 className="w-5 h-5 text-purple-400" />
+        <Card3DTilt maxTilt={8} scale={1.03} className="h-full">
+          <div className="h-full p-5 rounded-2xl bg-slate-900/90 border border-purple-500/30 backdrop-blur-md shadow-xl transition hover:border-purple-400">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono text-slate-400 uppercase">Honeypot Decoy Matches</span>
+              <CheckCircle2 className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="text-3xl font-extrabold font-mono text-purple-400 flex items-baseline gap-1.5">
+              <span>{stats.honeypotEvents || 4}</span>
+              <span className="text-xs text-purple-300 font-normal font-sans">intercepts</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Autonomous traps catching active syndicates</p>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-purple-400 flex items-baseline gap-1.5">
-            <span>{stats.honeypotEvents || 4}</span>
-            <span className="text-xs text-purple-300 font-normal font-sans">intercepts</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Autonomous traps catching active syndicates</p>
-        </div>
+        </Card3DTilt>
 
       </div>
 
