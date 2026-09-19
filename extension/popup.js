@@ -215,6 +215,7 @@ function initPopup() {
 
   // Scan current active screen/tab/WhatsApp media
   async function scanCurrentScreen() {
+    console.log("[ScamShield] Starting Scan Current Screen execution...");
     idleCard?.classList.add("hidden");
     loadingEl?.classList.remove("hidden");
     resultEl?.classList.add("hidden");
@@ -231,17 +232,22 @@ function initPopup() {
       let activeTab = null;
       if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
         try {
-          const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-          if (tabs && tabs.length > 0) {
-            activeTab = tabs[0];
-          } else {
-            const allActive = await chrome.tabs.query({ active: true });
-            if (allActive && allActive.length > 0) {
-              activeTab = allActive[0];
-            }
-          }
-        } catch (tabErr) {
-          console.warn("[ScamShield] Tab query note:", tabErr);
+          const tabs1 = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tabs1 && tabs1.length > 0) activeTab = tabs1[0];
+        } catch (e1) {}
+
+        if (!activeTab) {
+          try {
+            const tabs2 = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+            if (tabs2 && tabs2.length > 0) activeTab = tabs2[0];
+          } catch (e2) {}
+        }
+
+        if (!activeTab) {
+          try {
+            const tabs3 = await chrome.tabs.query({ active: true });
+            if (tabs3 && tabs3.length > 0) activeTab = tabs3[0];
+          } catch (e3) {}
         }
       }
 
@@ -250,7 +256,7 @@ function initPopup() {
         pageTitle = activeTab.title || "Active Page";
         extractedInput = pageUrl;
 
-        // Isolated tab text & media extractor
+        // Isolated tab text & media extractor function for content script
         function getActiveTabPayload() {
           try {
             // 1. WhatsApp Web Fullscreen Media Viewer
@@ -322,7 +328,7 @@ function initPopup() {
               target: { tabId: activeTab.id },
               func: getActiveTabPayload
             });
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Script Timeout")), 1600));
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Script Timeout")), 1400));
             const results = await Promise.race([scriptPromise, timeoutPromise]);
 
             if (results && results[0] && results[0].result) {
@@ -368,8 +374,8 @@ function initPopup() {
   }
 
   function renderResults(data, displayTitle = "", textLength = 0) {
-    loadingEl.classList.add("hidden");
-    resultEl.classList.remove("hidden");
+    loadingEl?.classList.add("hidden");
+    resultEl?.classList.remove("hidden");
 
     const scoreEl = document.getElementById("riskScore");
     const levelEl = document.getElementById("riskLevel");
@@ -379,6 +385,7 @@ function initPopup() {
     const evidenceList = document.getElementById("evidenceList");
     const targetUrlEl = document.getElementById("targetUrl");
     const summaryEl = document.getElementById("summaryText");
+    const confidenceEl = document.getElementById("confidence");
 
     if (targetUrlEl) {
       targetUrlEl.textContent = displayTitle ? `${displayTitle.slice(0, 36)}...` : "Opportunity Inspection";
@@ -387,41 +394,45 @@ function initPopup() {
     let finalScore = Number(data.riskScore);
     let finalLevel = data.riskLevel;
 
-    scoreEl.textContent = `${finalScore}/100`;
-    levelEl.textContent = `${finalLevel} RISK`;
-    document.getElementById("confidence").textContent = `${data.confidence || 98}% AI Confidence`;
+    if (scoreEl) scoreEl.textContent = `${finalScore}/100`;
+    if (levelEl) levelEl.textContent = `${finalLevel} RISK`;
+    if (confidenceEl) confidenceEl.textContent = `${data.confidence || 98}% AI Confidence`;
     
     if (summaryEl) {
       summaryEl.textContent = data.summary;
     }
 
     // Dynamic UI Styling
-    if (finalLevel === "CRITICAL" || finalScore >= 80) {
-      scoreCard.style.borderColor = "#EF4444";
-      scoreEl.style.color = "#EF4444";
-      levelEl.style.color = "#EF4444";
-      statusDot.style.background = "#EF4444";
-      brandText.textContent = data.verification?.claimedName ? `Risk Mismatch: ${data.verification.claimedName}` : "High-Risk Unverified Channel";
-    } else {
-      scoreCard.style.borderColor = "#10B981";
-      scoreEl.style.color = "#10B981";
-      levelEl.style.color = "#10B981";
-      statusDot.style.background = "#10B981";
-      brandText.textContent = data.verification?.claimedName ? `Verified: ${data.verification.claimedName}` : "Verified Authentic Document";
+    if (scoreCard && statusDot && brandText) {
+      if (finalLevel === "CRITICAL" || finalScore >= 80) {
+        scoreCard.style.borderColor = "#EF4444";
+        if (scoreEl) scoreEl.style.color = "#EF4444";
+        if (levelEl) levelEl.style.color = "#EF4444";
+        statusDot.style.background = "#EF4444";
+        brandText.textContent = data.verification?.claimedName ? `Risk Mismatch: ${data.verification.claimedName}` : "High-Risk Unverified Channel";
+      } else {
+        scoreCard.style.borderColor = "#10B981";
+        if (scoreEl) scoreEl.style.color = "#10B981";
+        if (levelEl) levelEl.style.color = "#10B981";
+        statusDot.style.background = "#10B981";
+        brandText.textContent = data.verification?.claimedName ? `Verified: ${data.verification.claimedName}` : "Verified Authentic Document";
+      }
     }
 
     // Evidence Items
-    evidenceList.innerHTML = "";
-    const items = data.evidenceList || [];
-    if (items.length === 0 || finalLevel === "LOW") {
-      evidenceList.innerHTML = `<div class="evidence-chip clean"><span>✓ Verified: Zero fee demands, safe domain & authentic communication</span></div>`;
-    } else {
-      items.slice(0, 3).forEach(ev => {
-        const chip = document.createElement("div");
-        chip.className = `evidence-chip ${ev.severity === "CRITICAL" ? "" : "warning"}`;
-        chip.innerHTML = `<strong>${ev.title}:</strong> <span>${(ev.description || "").substring(0, 75)}...</span>`;
-        evidenceList.appendChild(chip);
-      });
+    if (evidenceList) {
+      evidenceList.innerHTML = "";
+      const items = data.evidenceList || [];
+      if (items.length === 0 || finalLevel === "LOW") {
+        evidenceList.innerHTML = `<div class="evidence-chip clean"><span>✓ Verified: Zero fee demands, safe domain & authentic communication</span></div>`;
+      } else {
+        items.slice(0, 3).forEach(ev => {
+          const chip = document.createElement("div");
+          chip.className = `evidence-chip ${ev.severity === "CRITICAL" ? "" : "warning"}`;
+          chip.innerHTML = `<strong>${ev.title}:</strong> <span>${(ev.description || "").substring(0, 75)}...</span>`;
+          evidenceList.appendChild(chip);
+        });
+      }
     }
   }
 
@@ -484,6 +495,7 @@ function initPopup() {
     const target = e.target;
     if (target && (target.id === "scanScreenBtn" || target.closest("#scanScreenBtn"))) {
       e.preventDefault();
+      console.log("[ScamShield] Delegated click on scanScreenBtn");
       scanCurrentScreen();
     }
   });
