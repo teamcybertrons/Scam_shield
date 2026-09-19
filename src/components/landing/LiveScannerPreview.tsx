@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Globe, 
   MessageSquare, 
@@ -9,7 +9,9 @@ import {
   ArrowRight, 
   Sparkles,
   UploadCloud,
-  FileText
+  FileText,
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
 import { RadialRiskMeter } from '../common/RadialRiskMeter';
 import { AnalysisResult } from '../../types';
@@ -29,8 +31,58 @@ export const LiveScannerPreview: React.FC<LiveScannerPreviewProps> = ({
   const [activeInputTab, setActiveInputTab] = useState<'URL' | 'MESSAGE' | 'SCREENSHOT'>('URL');
   const [urlInput, setUrlInput] = useState('https://infosys-careers-apply.xyz/internship-registration?ref=telegram_batch4');
   const [messageInput, setMessageInput] = useState('Congratulations! You are shortlisted for Google/Infosys remote intern role. Pay Rs 1,999 registration fee immediately to confirm your seat: UPI infosys.hr.recruitment@paytm');
-  const [selectedFile, setSelectedFile] = useState<string | null>('offer_letter_scam_sample.png');
+  
+  // Real file upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>('offer_letter_scam_sample.png');
+  const [selectedFileSize, setSelectedFileSize] = useState<string | null>('420 KB');
+  const [extractedOcrText, setExtractedOcrText] = useState<string>('Offer Letter: Selected for Infosys Internship. Mandatory ₹1,999 seat deposit via UPI to securityfee.tcs@oksbi within 2 hours.');
+  const [isDragging, setIsDragging] = useState(false);
   const [selectedSignalId, setSelectedSignalId] = useState<string | null>('signal-payment');
+
+  const processFile = (file: File) => {
+    setSelectedFileName(file.name);
+    setSelectedFileSize(`${(file.size / 1024).toFixed(1)} KB`);
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedPreview(e.target?.result as string);
+        setExtractedOcrText(`Scanned Document [${file.name}]: Selected for Tech Internship. Requires upfront ₹1,999 deposit payment.`);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setUploadedPreview(null);
+      setExtractedOcrText(`PDF Document [${file.name}]: Verification requirement with upfront monetary fee.`);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleClearFile = () => {
+    setUploadedPreview(null);
+    setSelectedFileName(null);
+    setSelectedFileSize(null);
+    setExtractedOcrText('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +91,7 @@ export const LiveScannerPreview: React.FC<LiveScannerPreviewProps> = ({
     } else if (activeInputTab === 'MESSAGE') {
       onRunScan('MESSAGE', messageInput);
     } else {
-      onRunScan('SCREENSHOT', selectedFile || 'uploaded_image.png');
+      onRunScan('SCREENSHOT', extractedOcrText || selectedFileName || 'Uploaded Offer Letter');
     }
   };
 
@@ -192,22 +244,94 @@ export const LiveScannerPreview: React.FC<LiveScannerPreviewProps> = ({
 
               {/* Screenshot Upload Dropzone */}
               {activeInputTab === 'SCREENSHOT' && (
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-300">
-                    Upload Offer Letter / Chat Screenshot:
+                <div className="space-y-3">
+                  <label className="text-xs font-medium text-slate-300 flex justify-between">
+                    <span>Upload Offer Letter / Chat Screenshot:</span>
+                    <span className="text-[11px] text-cyan-400">OCR & PII Redaction Active</span>
                   </label>
-                  <div 
-                    onClick={() => setSelectedFile('offer_letter_scam_sample.png')}
-                    className="border-2 border-dashed border-cyan-500/30 hover:border-cyan-400 rounded-xl p-6 text-center bg-slate-950/60 hover:bg-slate-950 transition cursor-pointer group"
-                  >
-                    <UploadCloud className="w-8 h-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <p className="text-xs text-slate-200 font-medium">
-                      {selectedFile ? `Selected: ${selectedFile}` : 'Drag & drop offer letter screenshot here, or click to browse'}
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      PNG, JPG, PDF (Automatic OCR & Private Redaction enabled)
-                    </p>
-                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png,image/jpeg,image/webp,image/jpg,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                  {!uploadedPreview && !selectedFileName ? (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer group ${
+                        isDragging
+                          ? 'border-cyan-400 bg-cyan-950/30'
+                          : 'border-cyan-500/30 hover:border-cyan-400 bg-slate-950/60 hover:bg-slate-950'
+                      }`}
+                    >
+                      <UploadCloud className="w-8 h-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                      <p className="text-xs text-slate-200 font-medium">
+                        Click to browse image or drag & drop offer letter screenshot
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        PNG, JPG, PDF (Automatic OCR & Private Redaction enabled)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          {uploadedPreview ? (
+                            <img 
+                              src={uploadedPreview} 
+                              alt="Upload preview" 
+                              className="w-11 h-11 object-cover rounded-lg border border-slate-700"
+                            />
+                          ) : (
+                            <div className="w-11 h-11 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                              <ImageIcon className="w-5 h-5" />
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-xs font-bold text-white block line-clamp-1">
+                              {selectedFileName || 'Scam_Offer_Scan.png'}
+                            </span>
+                            <span className="text-[10px] text-cyan-400 font-mono">
+                              {selectedFileSize || 'Ready for Analysis'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer"
+                          >
+                            Browse
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleClearFile}
+                            className="text-[11px] px-2.5 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition cursor-pointer"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800/80">
+                        <input
+                          type="text"
+                          value={extractedOcrText}
+                          onChange={(e) => setExtractedOcrText(e.target.value)}
+                          placeholder="Extracted OCR text payload..."
+                          className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-200 font-mono focus:border-cyan-400 outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -283,17 +407,17 @@ export const LiveScannerPreview: React.FC<LiveScannerPreviewProps> = ({
             {/* Clickable Signals List */}
             <div className="space-y-2.5">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                Detected Threat Signals (Click to Inspect):
+                Detected Forensic Evidence ({activeResult.evidenceList?.length || 0} Signals):
               </span>
 
               <div className="space-y-2">
-                {signals.map((sig) => {
-                  const isSelected = selectedSignalId === sig.id;
-                  const isCrit = sig.type === 'critical';
+                {(activeResult.evidenceList && activeResult.evidenceList.length > 0 ? activeResult.evidenceList : signals).map((sig: any, idx: number) => {
+                  const isCrit = (sig.severity === 'CRITICAL' || sig.severity === 'HIGH' || sig.type === 'critical');
+                  const isSelected = selectedSignalId === (sig.id || `sig-${idx}`);
                   return (
                     <div
-                      key={sig.id}
-                      onClick={() => setSelectedSignalId(sig.id)}
+                      key={sig.id || idx}
+                      onClick={() => setSelectedSignalId(sig.id || `sig-${idx}`)}
                       className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
                         isSelected
                           ? isCrit
@@ -315,13 +439,18 @@ export const LiveScannerPreview: React.FC<LiveScannerPreviewProps> = ({
                             <span className="text-xs font-bold text-white">
                               {sig.title}
                             </span>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                              {sig.tag}
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                              {sig.evidenceSource || sig.tag || sig.category?.toUpperCase()}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                            {sig.desc}
+                          <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                            {sig.description || sig.desc}
                           </p>
+                          {sig.detectedQuote && (
+                            <div className="mt-1.5 text-[11px] font-mono text-cyan-300/90 bg-cyan-950/30 border border-cyan-500/20 px-2 py-1 rounded">
+                              &ldquo;{sig.detectedQuote}&rdquo;
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

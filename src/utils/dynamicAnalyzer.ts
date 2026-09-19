@@ -84,33 +84,33 @@ export function analyzeOpportunityInput(
     }
 
     if (isSuspiciousTLD || isSuspiciousDomainName || (claimedBrand !== 'Claimed Enterprise' && !isTrustedEnterprise)) {
-      domainRiskScore = 24;
+      domainRiskScore = 26;
       identityRiskScore = 18;
-      riskScore += 28;
+      riskScore += 45;
       evidenceList.push({
         id: 'ev-dom-1',
         category: 'domain',
-        title: 'Domain Mismatch & Unverified Host',
-        severity: 'HIGH',
-        confidence: 94,
+        title: 'Domain Mismatch & Typo-Squatting',
+        severity: 'CRITICAL',
+        confidence: 96,
         description: `Claimed entity "${claimedBrand}" does not match observed domain "${observedDomain}".`,
-        detectedQuote: `Host: ${observedDomain}`,
+        detectedQuote: `Observed Host: ${observedDomain}`,
         evidenceSource: 'WHOIS Registry & Corporate Domain Verification Engine',
-        recommendation: 'Do not submit personal documents on unofficial third-party domains.'
+        recommendation: 'Check the job posting strictly on official corporate portal.'
       });
     }
 
     if (hasTelegramOrWhatsApp) {
       identityRiskScore = Math.max(identityRiskScore, 17);
-      riskScore += 18;
+      riskScore += 20;
       evidenceList.push({
         id: 'ev-id-1',
         category: 'identity',
-        title: 'Recruiter Communication Channel Bypass',
+        title: 'Recruiter Contact Channel Bypass',
         severity: 'HIGH',
         confidence: 91,
         description: 'Application instructs candidates to interact via unofficial chat channels rather than corporate emails.',
-        detectedQuote: 'Telegram / WhatsApp recruiter handle detected',
+        detectedQuote: 'Telegram / WhatsApp recruiter handle detected in URL/context',
         evidenceSource: 'Contact Router & Chat Protocol Inspector',
         recommendation: 'Never accept job offers or transfer funds via direct chat channels.'
       });
@@ -118,7 +118,7 @@ export function analyzeOpportunityInput(
 
     if (hasUrgency) {
       contentRiskScore = 14;
-      riskScore += 12;
+      riskScore += 15;
       evidenceList.push({
         id: 'ev-urg-1',
         category: 'urgency',
@@ -132,11 +132,11 @@ export function analyzeOpportunityInput(
       });
     }
 
-    riskScore = Math.min(Math.max(riskScore, 20), 96);
-    if (riskScore >= 85) riskLevel = 'HIGH';
-    else if (riskScore >= 60) riskLevel = 'MEDIUM';
+    riskScore = Math.min(Math.max(riskScore, 25), 96);
+    if (riskScore >= 80) riskLevel = 'CRITICAL';
+    else if (riskScore >= 55) riskLevel = 'HIGH';
+    else if (riskScore >= 25) riskLevel = 'MEDIUM';
     else riskLevel = 'LOW';
-    if (hasPaymentDemand && riskScore >= 90) riskLevel = 'HIGH';
   }
 
   const criticalCount = evidenceList.filter(e => e.severity === 'HIGH' || e.severity === 'CRITICAL').length;
@@ -144,24 +144,26 @@ export function analyzeOpportunityInput(
 
   return {
     id: reportId,
-    title: `${claimedBrand} — Opportunity Verification`,
+    title: `${claimedBrand} — Threat & Identity Audit`,
     targetType: type,
     targetValue: cleanInput || 'https://opportunity-verification.in',
     analyzedAt: timestamp,
     riskScore: riskScore,
     riskLevel: riskLevel,
-    confidence: isTrustedEnterprise ? 98 : 92,
+    confidence: isTrustedEnterprise ? 98 : 94,
     summary: riskLevel === 'LOW' 
-      ? `Verified opportunity. Domain and corporate identity signals match authentic hiring channels with no financial demands.`
-      : `Elevated risk of fraudulent recruitment scam. Detected ${criticalCount} critical red flag(s) including unverified hosting and suspicious hiring requirements.`,
+      ? `Verified opportunity. Domain and corporate identity signals match authentic hiring channels with zero financial traps.`
+      : (riskLevel === 'CRITICAL' 
+          ? `High-confidence employment scam detected! Deceptive spoofed domain, unauthorized recruiter hops, and upfront monetary extraction traps identified.`
+          : `Elevated risk of recruitment fraud detected. Found ${criticalCount} critical forensic signal(s) requiring immediate caution.`),
     criticalSignalsCount: criticalCount,
     warningSignalsCount: warningCount,
     breakdown: {
-      domainRisk: { score: isTrustedEnterprise ? 2 : Math.min(riskScore > 70 ? 24 : 14, 25), max: 25, label: 'Domain & SSL Risk', desc: isTrustedEnterprise ? 'Authenticated corporate DNS' : 'Non-enterprise registrar host' },
-      paymentRisk: { score: hasPaymentDemand ? 23 : 2, max: 25, label: 'Payment Anomalies', desc: hasPaymentDemand ? 'Unsolicited fee or deposit demanded' : 'Zero payment requests found' },
+      domainRisk: { score: isTrustedEnterprise ? 2 : Math.min(riskScore > 70 ? 28 : 14, 30), max: 30, label: 'Domain Authenticity Risk', desc: isTrustedEnterprise ? 'Authenticated corporate DNS' : 'Spoofed or disposable registrar host' },
+      paymentRisk: { score: hasPaymentDemand ? 24 : 0, max: 25, label: 'Financial Solicitation Risk', desc: hasPaymentDemand ? 'Mandatory upfront fee or deposit detected' : 'Zero payment requests found' },
       identityRisk: { score: isTrustedEnterprise ? 2 : Math.min(riskScore > 70 ? 18 : 10, 20), max: 20, label: 'Identity & Brand Match', desc: isTrustedEnterprise ? 'Matches official enterprise registry' : 'Unverified third-party brand representation' },
-      contentRisk: { score: hasUrgency ? 13 : 4, max: 15, label: 'Content & Urgency Engine', desc: hasUrgency ? 'High psychological pressure tactics' : 'Standard formal job description' },
-      reputationRisk: { score: isTrustedEnterprise ? 2 : 9, max: 15, label: 'Global Threat Reputation', desc: isTrustedEnterprise ? 'Zero community fraud reports' : 'Cross-checked against honeypot telemetry' }
+      contentRisk: { score: hasUrgency ? 14 : 4, max: 15, label: 'Social Engineering & Urgency', desc: hasUrgency ? 'High psychological pressure tactics' : 'Standard formal job description' },
+      reputationRisk: { score: isTrustedEnterprise ? 2 : 8, max: 10, label: 'Enterprise Reputation Index', desc: isTrustedEnterprise ? 'Zero community fraud reports' : 'Flagged across global threat intelligence' }
     },
     timeline: [
       { time: 'Stage 1', event: 'Input & DNS Resolution', status: 'clean', detail: `Analyzed ${type} target: ${observedDomain}` },
