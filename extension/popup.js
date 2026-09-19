@@ -2,7 +2,7 @@
 const API_BASE_URL = "http://localhost:8000/api";
 
 function initPopup() {
-  console.log("[ScamShield Extension] Popup Initialized");
+  console.log("[ScamShield Extension v2.1] Popup Initialized");
   const idleCard = document.getElementById("idleCard");
   const loadingEl = document.getElementById("loading");
   const loadingText = document.getElementById("loadingText");
@@ -183,7 +183,7 @@ function initPopup() {
       }
     }
 
-    // Strict score bracket enforcement (Identical to Website dynamicAnalyzer.ts):
+    // Strict score bracket enforcement:
     // Below 50% => 11% - 19% (LOW RISK)
     // Above 50% => 80% - 90% (CRITICAL RISK)
     if (riskScore < 50 || evidenceList.length === 0) {
@@ -215,11 +215,25 @@ function initPopup() {
 
   // Scan current active screen/tab/WhatsApp media
   async function scanCurrentScreen() {
-    console.log("[ScamShield] Starting Scan Current Screen execution...");
-    idleCard?.classList.add("hidden");
-    loadingEl?.classList.remove("hidden");
-    resultEl?.classList.add("hidden");
-    errorBox?.classList.add("hidden");
+    console.log("[ScamShield] Scan Current Screen button activated.");
+    
+    // Immediate UI State Switch
+    if (idleCard) {
+      idleCard.classList.add("hidden");
+      idleCard.style.display = "none";
+    }
+    if (loadingEl) {
+      loadingEl.classList.remove("hidden");
+      loadingEl.style.display = "flex";
+    }
+    if (resultEl) {
+      resultEl.classList.add("hidden");
+      resultEl.style.display = "none";
+    }
+    if (errorBox) {
+      errorBox.classList.add("hidden");
+      errorBox.style.display = "none";
+    }
 
     if (loadingText) loadingText.textContent = "Scanning active screen content...";
     if (loadingSub) loadingSub.textContent = "Extracting visible text & active media elements";
@@ -256,7 +270,7 @@ function initPopup() {
         pageTitle = activeTab.title || "Active Page";
         extractedInput = pageUrl;
 
-        // Isolated tab text & media extractor function for content script
+        // Content Script Payload for WhatsApp & page text
         function getActiveTabPayload() {
           try {
             // 1. WhatsApp Web Fullscreen Media Viewer
@@ -288,7 +302,7 @@ function initPopup() {
               }
             }
 
-            // 2. Direct Image Tab (.jpg, .jpeg, .png, etc.)
+            // 2. Direct Image Tab
             const urlLower = (window.location.href || "").toLowerCase();
             if (urlLower.match(/\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i) || (document.contentType && document.contentType.startsWith('image/'))) {
               if (urlLower.includes('fake') || urlLower.includes('scam') || urlLower.includes('deposit') || urlLower.includes('2499') || urlLower.includes('9.37')) {
@@ -306,7 +320,7 @@ function initPopup() {
               }
             }
 
-            // 3. Regular webpage
+            // 3. Regular Webpage
             let bodyText = document.body ? (document.body.innerText || "").slice(0, 5000) : "";
             return {
               type: "URL",
@@ -328,7 +342,7 @@ function initPopup() {
               target: { tabId: activeTab.id },
               func: getActiveTabPayload
             });
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Script Timeout")), 1400));
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Script Timeout")), 1200));
             const results = await Promise.race([scriptPromise, timeoutPromise]);
 
             if (results && results[0] && results[0].result) {
@@ -337,7 +351,7 @@ function initPopup() {
               scanType = results[0].result.type || "URL";
             }
           } catch (e) {
-            console.warn("[ScamShield] Script injection fallback to tab URL:", e);
+            console.warn("[ScamShield] Script execution fallback to tab URL:", e);
             extractedInput = pageUrl || "Active Tab";
           }
         }
@@ -352,7 +366,7 @@ function initPopup() {
       const analysisData = analyzeOpportunityInput(scanType, extractedInput || pageTitle || "Web Page");
       currentAnalysisId = analysisData.id;
 
-      // Display loader animation for 2 seconds before showing risk score
+      // Play loader animation for 2 seconds
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Render Results
@@ -360,22 +374,27 @@ function initPopup() {
 
     } catch (err) {
       console.error("[ScamShield Scan Error]", err);
-      // Fallback: render analysis so UI never stays stuck in loading
       try {
         const fallbackAnalysis = analyzeOpportunityInput("URL", extractedInput || pageTitle || "Active Opportunity");
         await new Promise(resolve => setTimeout(resolve, 1500));
         renderResults(fallbackAnalysis, pageTitle, 30);
       } catch (innerErr) {
-        loadingEl?.classList.add("hidden");
-        errorBox?.classList.remove("hidden");
+        if (loadingEl) { loadingEl.classList.add("hidden"); loadingEl.style.display = "none"; }
+        if (errorBox) { errorBox.classList.remove("hidden"); errorBox.style.display = "block"; }
         if (errorDesc) errorDesc.textContent = err.message || "Failed to scan current screen.";
       }
     }
   }
 
   function renderResults(data, displayTitle = "", textLength = 0) {
-    loadingEl?.classList.add("hidden");
-    resultEl?.classList.remove("hidden");
+    if (loadingEl) {
+      loadingEl.classList.add("hidden");
+      loadingEl.style.display = "none";
+    }
+    if (resultEl) {
+      resultEl.classList.remove("hidden");
+      resultEl.style.display = "block";
+    }
 
     const scoreEl = document.getElementById("riskScore");
     const levelEl = document.getElementById("riskLevel");
@@ -436,30 +455,30 @@ function initPopup() {
     }
   }
 
-  // Direct & Delegated Event Listeners
+  // Attach direct button listeners
   if (scanScreenBtn) {
-    scanScreenBtn.addEventListener("click", (e) => {
+    scanScreenBtn.onclick = function(e) {
       e.preventDefault();
-      console.log("[ScamShield] Scan Current Screen clicked");
       scanCurrentScreen();
-    });
+    };
   }
 
   if (scanCustomBtn && customUrlInput) {
-    scanCustomBtn.addEventListener("click", (e) => {
+    scanCustomBtn.onclick = function(e) {
       e.preventDefault();
       const inputVal = customUrlInput.value.trim();
       if (inputVal) {
-        idleCard?.classList.add("hidden");
-        loadingEl?.classList.remove("hidden");
-        resultEl?.classList.add("hidden");
-        errorBox?.classList.add("hidden");
+        if (idleCard) { idleCard.classList.add("hidden"); idleCard.style.display = "none"; }
+        if (loadingEl) { loadingEl.classList.remove("hidden"); loadingEl.style.display = "flex"; }
+        if (resultEl) { resultEl.classList.add("hidden"); resultEl.style.display = "none"; }
+        if (errorBox) { errorBox.classList.add("hidden"); errorBox.style.display = "none"; }
+        
         const analysis = analyzeOpportunityInput('URL', inputVal);
         setTimeout(() => {
           renderResults(analysis, inputVal.slice(0, 30), inputVal.length);
         }, 2000);
       }
-    });
+    };
 
     customUrlInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -469,14 +488,14 @@ function initPopup() {
   }
 
   if (retryBtn) {
-    retryBtn.addEventListener("click", (e) => {
+    retryBtn.onclick = function(e) {
       e.preventDefault();
       scanCurrentScreen();
-    });
+    };
   }
 
   if (openReportBtn) {
-    openReportBtn.addEventListener("click", (e) => {
+    openReportBtn.onclick = function(e) {
       e.preventDefault();
       if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.create) {
         if (currentAnalysisId) {
@@ -487,21 +506,20 @@ function initPopup() {
       } else {
         window.open(currentAnalysisId ? `http://localhost:5173/?report=${currentAnalysisId}` : `http://localhost:5173`, '_blank');
       }
-    });
+    };
   }
 
-  // Global event delegation fallback
-  document.addEventListener("click", (e) => {
-    const target = e.target;
-    if (target && (target.id === "scanScreenBtn" || target.closest("#scanScreenBtn"))) {
+  // Global Click Delegation Fallback
+  document.body.addEventListener("click", function(e) {
+    const btn = e.target.closest("#scanScreenBtn");
+    if (btn) {
       e.preventDefault();
-      console.log("[ScamShield] Delegated click on scanScreenBtn");
       scanCurrentScreen();
     }
-  });
+  }, true);
 }
 
-// Support both immediate execution and DOMContentLoaded
+// Execute immediately and on DOM load
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initPopup);
 } else {
