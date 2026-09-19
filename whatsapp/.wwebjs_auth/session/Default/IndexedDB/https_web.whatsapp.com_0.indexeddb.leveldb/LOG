@@ -1,0 +1,20 @@
+2026/09/19-23:45:29.530 81ac Reusing MANIFEST d:\HACKSPORA 2.0\scamshield\whatsapp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/09/19-23:45:29.530 81ac Recovering log #132
+2026/09/19-23:45:29.546 81ac Reusing old log d:\HACKSPORA 2.0\scamshield\whatsapp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000132.log 
+2026/09/19-23:45:43.918 81ac Level-0 table #141: started
+2026/09/19-23:45:43.968 81ac Level-0 table #141: 1065057 bytes OK
+2026/09/19-23:45:43.969 81ac Delete type=0 #132
+2026/09/19-23:45:43.974 81ac Compacting 1@1 + 5@2 files
+2026/09/19-23:45:44.211 81ac Generated table #142@1: 91128 keys, 2257455 bytes
+2026/09/19-23:45:44.277 81ac Generated table #143@1: 33438 keys, 2206994 bytes
+2026/09/19-23:45:44.335 81ac Generated table #144@1: 15946 keys, 2194747 bytes
+2026/09/19-23:45:44.432 81ac Generated table #145@1: 51244 keys, 2229847 bytes
+2026/09/19-23:45:44.451 81ac Generated table #146@1: 11712 keys, 454243 bytes
+2026/09/19-23:45:44.451 81ac Compacted 1@1 + 5@2 files => 9343286 bytes
+2026/09/19-23:45:44.453 81ac compacted to: files[ 0 0 5 0 0 0 0 ]
+2026/09/19-23:45:44.453 81ac Delete type=2 #134
+2026/09/19-23:45:44.453 81ac Delete type=2 #135
+2026/09/19-23:45:44.453 81ac Delete type=2 #136
+2026/09/19-23:45:44.453 81ac Delete type=2 #137
+2026/09/19-23:45:44.453 81ac Delete type=2 #138
+2026/09/19-23:45:44.453 81ac Delete type=2 #141

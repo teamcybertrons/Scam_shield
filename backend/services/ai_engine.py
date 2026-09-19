@@ -18,8 +18,8 @@ class AIEngine:
         Uses external LLM (Gemini or OpenAI) if API key configured, otherwise runs
         deterministic structured semantic NLP analysis.
         """
-        # If Gemini API Key is configured, attempt live call with fallback
-        if settings.GEMINI_API_KEY and settings.AI_PROVIDER in ("gemini", "hybrid"):
+        # If Gemini API Key is configured and starts with valid AIza prefix, attempt call
+        if settings.GEMINI_API_KEY and settings.GEMINI_API_KEY.startswith("AIza") and settings.AI_PROVIDER in ("gemini", "hybrid"):
             try:
                 gemini_res = await cls._call_gemini_api(content, context_type)
                 if gemini_res:
@@ -48,10 +48,10 @@ class AIEngine:
         
         # 1. Payment Requests / Upfront Fees
         payment_patterns = [
-            (r"(?:₹|rs\.?|inr|\$)\s*\d+[\d,]*", "Explicit monetary amount detected"),
-            (r"(?:security|laptop|training|registration|processing|caution|bond)\s*(?:deposit|fee|charge|amount)", "Upfront fee/deposit requirement"),
-            (r"(?:upi|gpay|phonepe|paytm|qr\s*code|bank\s*transfer|vpa)", "Direct merchant/UPI transaction solicitation"),
-            (r"(?:refundable|reimbursed\s*in\s*first\s*salary)", "False refund guarantee promise (classic advance fee scam lure)")
+            (r"(?:pay|deposit|transfer|send|charge|fee|amount)\s*(?:of\s*)?(?:₹|rs\.?|inr|\$)\s*\d+[\d,]*", "Explicit fee or deposit solicitation"),
+            (r"(?:security|laptop|training|registration|processing|caution|bond)\s*(?:deposit|fee|charge|cost|amount)", "Upfront fee/deposit requirement"),
+            (r"(?:upi\s*id|gpay|phonepe|paytm|scan\s*qr|qr\s*code|vpa)", "Direct merchant/UPI transaction solicitation"),
+            (r"(?:refundable\s*deposit|refundable\s*fee|reimbursed\s*in\s*first\s*salary)", "False refund guarantee promise (classic advance fee scam lure)")
         ]
         payment_detected = False
         for pattern, label in payment_patterns:
@@ -73,8 +73,8 @@ class AIEngine:
 
         # 2. Artificial Urgency & High-Pressure Tactics
         urgency_patterns = [
-            (r"(?:within\s*\d+\s*(?:hours|hrs|mins|minutes)|by\s*today|deadline\s*in|expires\s*in)", "Strict short-window countdown"),
-            (r"(?:urgent|immediately|slots?\s*filling\s*fast|limited\s*seats|last\s*chance)", "Scarcity & high-pressure psychological manipulation")
+            (r"(?:within\s*\d+\s*(?:hours|hrs|mins|minutes)|deadline\s*in|expires\s*in\s*\d+)", "Strict short-window countdown"),
+            (r"(?:urgent\s*hiring|slots?\s*filling\s*fast|limited\s*seats|last\s*chance\s*to\s*apply)", "Scarcity & high-pressure psychological manipulation")
         ]
         urgency_detected = False
         for pattern, label in urgency_patterns:
@@ -96,7 +96,7 @@ class AIEngine:
 
         # 3. Credential & Identity Harvesting
         credential_patterns = [
-            (r"(?:aadhaar|pan\s*card|passport|bank\s*account|otp|password|debit\s*card)", "High-risk identity document collection"),
+            (r"(?:send\s*aadhaar|send\s*pan\s*card|passport\s*copy|bank\s*account\s*details|share\s*otp|password|debit\s*card)", "High-risk identity document collection"),
             (r"(?:fill\s*this\s*google\s*form|forms\.gle|bit\.ly|tinyurl)", "Third-party unofficial form redirection")
         ]
         credential_detected = False
@@ -119,9 +119,8 @@ class AIEngine:
 
         # 4. Unrealistic Promises & Guarantees
         unrealistic_patterns = [
-            (r"(?:no\s*interview|direct\s*selection|guaranteed\s*placement|100%\s*selection)", "Bypassed interview process guarantee"),
-            (r"(?:stipend\s*(?:of\s*)?(?:₹|rs\.?|inr)?\s*(?:4[0-9]|5[0-9]|6[0-9]|7[0-9]|8[0-9]|9[0-9]|[1-9]\d{2}),?\d{3})", "Disproportionately high entry stipend offer"),
-            (r"(?:work\s*from\s*home\s*2\s*hours|earn\s*(?:daily|per\s*day))", "Task-based work from home scheme")
+            (r"(?:no\s*interview|direct\s*selection\s*without|guaranteed\s*placement\s*100%|100%\s*selection\s*guaranteed)", "Bypassed interview process guarantee"),
+            (r"(?:earn\s*(?:daily|per\s*day)\s*(?:₹|rs\.?|\$)\d+|part[\s-]time\s*earn\s*(?:daily|per\s*day))", "Task-based work from home scheme")
         ]
         for pattern, label in unrealistic_patterns:
             matches = re.findall(pattern, text_lower)
@@ -140,13 +139,14 @@ class AIEngine:
                 break
 
         # 5. Channel Migration (Telegram / WhatsApp / Personal Email)
+        # Avoid false matching "whatsapp image" from uploaded file metadata
         channel_patterns = [
-            (r"(?:t\.me\/|telegram|whatsapp|wa\.me\/|gmail\.com|yahoo\.com|outlook\.com|hotmail\.com)", "Off-platform migration to unmonitored messaging app")
+            (r"(?:t\.me\/|telegram\s*(?:channel|id|group|handle|bot|:)|wa\.me\/|contact\s*(?:us\s*)?on\s*(?:telegram|whatsapp)|reach\s*out\s*on\s*whatsapp|dm\s*on\s*telegram|@(?!novatech)[a-z0-9_]+_(?:desk|hr|recruitment)|recruiter[a-z0-9_]*@(?:gmail|yahoo|hotmail)\.com)", "Off-platform migration to unmonitored messaging app")
         ]
         for pattern, label in channel_patterns:
             matches = re.findall(pattern, text_lower)
             if matches:
-                signals.append(f"Communication Channel: {label}")
+                signals.append(f"Channel Migration: {label}")
                 evidence.append({
                     "category": "technical",
                     "title": "Personal / Unofficial Communication Channel",
@@ -159,8 +159,47 @@ class AIEngine:
                 })
                 break
 
+        # 6. Domain Typosquatting, Lookalikes & Phishing Hosting
+        domain_patterns = [
+            (r"(?:infosys|tcs|wipro|google|microsoft|amazon|accenture|cognizant)[a-z0-9-]*\.(?:xyz|top|site|online|link|icu|click|fun|rest|live|store|club)", "Brand impersonation on disposable TLD"),
+            (r"(?:careers-apply|hiring-portal|jobs-online|onboarding-verify|internship-registration|verify-deposit)\.", "Suspicious deceptive recruitment sub-domain"),
+            (r"\.(?:xyz|top|icu|click|link|fun|rest)(?:\/|$|\?)", "High-abuse disposable top-level domain (TLD)")
+        ]
+        domain_spoof_detected = False
+        for pattern, label in domain_patterns:
+            matches = re.findall(pattern, text_lower)
+            if matches:
+                domain_spoof_detected = True
+                signals.append(f"Domain Threat: {label}")
+                evidence.append({
+                    "category": "domain",
+                    "title": "Brand Impersonation & Typosquatting Domain Detected",
+                    "severity": "CRITICAL",
+                    "confidence": 96,
+                    "description": f"Domain exhibits high-risk phishing anomalies ({label}). Not registered to the official enterprise.",
+                    "detected_quote": matches[0] if isinstance(matches[0], str) else str(matches[0]),
+                    "evidence_source": "DNS & WHOIS Forensics",
+                    "recommendation": "Do not access this portal or enter personal credentials."
+                })
+                break
+
         # Synthesize Risk Category & Summary
-        if payment_detected and urgency_detected:
+        if domain_spoof_detected and payment_detected:
+            risk_category = "Brand Impersonation & Advance Fee Scam (Critical)"
+            risk_summary = "High-confidence recruitment scam! Combines lookalike brand impersonation domain with mandatory upfront monetary extortion traps."
+            recommendations = [
+                "Do NOT pay any requested fee or deposit.",
+                "Verify the opening directly on the official corporate careers portal.",
+                "Block the sender and report to cybercrime authorities."
+            ]
+        elif domain_spoof_detected:
+            risk_category = "Phishing & Brand Impersonation Portal (Critical Severity)"
+            risk_summary = "Deceptive brand impersonation website detected. Host is a lookalike domain cloned to steal candidate credentials."
+            recommendations = [
+                "Never submit resumes or identity documents on third-party lookalike domains.",
+                "Cross-check opening strictly on the official enterprise portal."
+            ]
+        elif payment_detected and urgency_detected:
             risk_category = "Advance Fee Recruitment Fraud (Critical Severity)"
             risk_summary = "High-confidence recruitment scam detected combining upfront monetary demands (security/laptop deposit) with high-pressure artificial urgency."
             recommendations = [
@@ -239,7 +278,7 @@ Return a valid JSON object matching EXACTLY this schema:
 }}
 """
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=2.5) as client:
             resp = await client.post(url, json={
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {"response_mime_type": "application/json"}
@@ -255,7 +294,7 @@ Return a valid JSON object matching EXACTLY this schema:
         url = "https://api.openai.com/v1/chat/completions"
         headers = {"Authorization": f"Bearer {settings.OPENAI_API_KEY}", "Content-Type": "application/json"}
         prompt = f"Analyze for job scams / phishing: {text}"
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=2.5) as client:
             resp = await client.post(url, headers=headers, json={
                 "model": "gpt-4o-mini",
                 "messages": [

@@ -16,10 +16,25 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 async function inspectTabSecurity(tabId, url) {
   try {
+    let pageContent = "";
+    if (tabId && url && url.startsWith("http")) {
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          func: () => document.body ? document.body.innerText.slice(0, 3500) : ""
+        });
+        if (results && results[0] && results[0].result) {
+          pageContent = results[0].result;
+        }
+      } catch (e) {
+        // Tab not yet ready or restricted
+      }
+    }
+
     const response = await fetch(`${API_BASE_URL}/analyze/url`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: url })
+      body: JSON.stringify({ url: url, page_content: pageContent })
     });
 
     if (response.ok) {

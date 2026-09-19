@@ -75,7 +75,7 @@ export interface ThreatIndicator {
   firstSeen: string;
   reportsCount: number;
   status: 'Active' | 'Takedown Issued' | 'Investigating' | 'Blocked';
-  category: 'Fake Internship' | 'Job Offer Scam' | 'Crypto Phishing' | 'Recruiter Impersonation' | 'Data Harvest';
+  category: 'Fake Internship' | 'Job Offer Scam' | 'Crypto Phishing' | 'Recruiter Impersonation' | 'Data Harvest' | 'UPI / Payment Fees' | 'Job Offer Phishing' | 'Data Harvesting' | string;
   targetedBrand: string;
 }
 

@@ -20,58 +20,40 @@ interface FeatureGridProps {
 export const FeatureGrid: React.FC<FeatureGridProps> = ({ setActiveTab }) => {
   const features = [
     {
+      tab: 'scanner' as ActiveTab,
+      icon: ShieldCheck,
+      title: 'AI Multi-Vector Threat Scanner',
+      desc: 'Real-time deep forensic analysis of job offer URLs, recruiter message copy, and scanned offer letter attachments.',
+      tag: 'CORE SCANNER',
+      color: 'text-cyan-400',
+      border: 'border-cyan-500/30'
+    },
+    {
       tab: 'threat-intel' as ActiveTab,
       icon: Network,
-      title: 'SOC Threat Intelligence',
-      desc: 'Real-time telemetry tracking active recruitment scam syndicates, honeypot traps, and dark map vectors across 40+ universities.',
+      title: 'SOC Threat Intelligence Hub',
+      desc: 'Real-time telemetry tracking active recruitment scam syndicates, impersonation vectors, and dark risk scores.',
       tag: 'SOC DASHBOARD',
-      color: 'text-cyan-400',
-      border: 'border-cyan-500/20'
-    },
-    {
-      tab: 'campaign-graph' as ActiveTab,
-      icon: Layers,
-      title: 'Scam Campaign Cluster Graph',
-      desc: 'Interactive multi-tier graph linking fake company brands, typo-squatted domains, burner WhatsApp recruiters, and UPI mule accounts.',
-      tag: 'GRAPH INTELLIGENCE',
       color: 'text-purple-400',
-      border: 'border-purple-500/20'
-    },
-    {
-      tab: 'honeypot' as ActiveTab,
-      icon: Radio,
-      title: 'Defensive Honeypot Decoys',
-      desc: 'Automated decoys safely intercept fraudulent messages and extract indicators before they reach real students.',
-      tag: 'DECOY TELEMETRY',
-      color: 'text-rose-400',
-      border: 'border-rose-500/20'
+      border: 'border-purple-500/30'
     },
     {
       tab: 'extension' as ActiveTab,
       icon: Globe,
-      title: 'Browser Extension Shield',
+      title: 'Manifest V3 Browser Extension',
       desc: 'Instant in-browser inspection on LinkedIn, Internshala, and job portals with proactive risk badges and threat callouts.',
       tag: 'CHROME / EDGE EXTENSION',
       color: 'text-emerald-400',
-      border: 'border-emerald-500/20'
+      border: 'border-emerald-500/30'
     },
     {
       tab: 'whatsapp-bot' as ActiveTab,
       icon: Bot,
-      title: 'WhatsApp ScamShield Bot',
-      desc: 'Forward suspicious job texts or screenshots directly on WhatsApp to receive an instant security risk report in seconds.',
+      title: 'Native WhatsApp Cyber Bot',
+      desc: 'Forward suspicious offer letters, links, or recruiter messages directly on WhatsApp to get instant AI risk audits.',
       tag: 'WHATSAPP BOT',
       color: 'text-amber-400',
-      border: 'border-amber-500/20'
-    },
-    {
-      tab: 'security-center' as ActiveTab,
-      icon: Lock,
-      title: 'Privacy-First Architecture',
-      desc: 'Zero retention of passwords, OTPs, or government IDs. Client-side OCR redaction ensures student safety at every step.',
-      tag: 'PRIVACY BY DESIGN',
-      color: 'text-blue-400',
-      border: 'border-blue-500/20'
+      border: 'border-amber-500/30'
     }
   ];
 
@@ -82,18 +64,18 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({ setActiveTab }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 block mb-2">
-              Full Cybersecurity Stack
+              Integrated Defense Grid
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               Enterprise Defense Engineered for Students
             </h2>
           </div>
           <p className="text-xs text-slate-400 max-w-md">
-            ScamShield combines honeypot telemetry, graph neural patterns, and explainable evidence verification into one unified defense grid.
+            ScamShield combines real-time URL forensics, OCR letter inspection, SOC intelligence, and browser protection into one unified ecosystem.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((f, i) => {
             const Icon = f.icon;
             return (

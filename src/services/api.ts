@@ -238,5 +238,18 @@ export const ScamShieldAPI = {
       role: 'analyst',
       isAuthenticated: true
     };
+  },
+
+  // 12. Live Database Telemetry Stats
+  async getTelemetryStats() {
+    try {
+      const res = await fetch(`${API_BASE}/telemetry/stats`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('[API Client] Live telemetry fetch failed:', e);
+    }
+    return null;
   }
 };

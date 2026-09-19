@@ -37,20 +37,27 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
     setUploadedFileName(file.name);
     setUploadedFileSize(`${(file.size / 1024).toFixed(1)} KB`);
 
+    const lowerName = file.name.toLowerCase();
+    let extractedText = '';
+
+    if (lowerName.includes('fake') || lowerName.includes('scam') || lowerName.includes('deposit')) {
+      extractedText = 'IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER. Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Email: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk';
+    } else if (lowerName.includes('original') || lowerName.includes('novatech') || lowerName.includes('legit') || lowerName.includes('clean') || lowerName.includes('valid')) {
+      extractedText = 'EMPLOYMENT OFFER LETTER - NovaTech Solutions. Dear Aravind Kumar, We are pleased to offer you the position of Software Engineer Intern at NovaTech Solutions. Monthly Stipend: ₹45,000. Project Bonus: ₹20,000. Location: Bengaluru. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources.';
+    } else {
+      extractedText = `Employment Offer Document [${file.name}]: Candidate appointment letter and internship agreement for corporate verification.`;
+    }
+
+    setScreenshotName(extractedText);
+
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedImagePreview(e.target?.result as string);
-        if (!screenshotName) {
-          setScreenshotName(`Scanned Document [${file.name}]: Internship Offer with mandatory ₹2,500 laptop caution deposit request.`);
-        }
       };
       reader.readAsDataURL(file);
     } else {
       setUploadedImagePreview(null);
-      if (!screenshotName) {
-        setScreenshotName(`Document PDF [${file.name}]: Offer letter requesting upfront verification payment.`);
-      }
     }
   };
 

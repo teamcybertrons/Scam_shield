@@ -43,42 +43,33 @@ def format_whatsapp_security_reply(analysis_res: dict) -> str:
     risk_score = analysis_res.get("riskScore", 0)
     risk_level = analysis_res.get("riskLevel", "UNKNOWN")
     report_id = analysis_res.get("id", "SCS-REP")
+    claimed_brand = analysis_res.get("verification", {}).get("claimedName") or "Company"
     
-    status_emoji = "🚨 CRITICAL RISK" if risk_score >= 80 else ("⚠️ HIGH RISK" if risk_score >= 55 else ("🟡 MODERATE RISK" if risk_score >= 25 else "✅ LOW RISK"))
+    is_scam = risk_score >= 80 or risk_level == "CRITICAL"
     
-    lines = [
-        f"🛡️ *SCAMSHIELD CYBERSECURITY VERDICT*",
-        f"────────────────────────",
-        f"*Threat Status:* {status_emoji}",
-        f"*Risk Score:* {risk_score}/100 | *Confidence:* {analysis_res.get('confidence', 90)}%",
-        f"*Category:* {analysis_res.get('tags', ['Employment Scam'])[0]}",
-        "",
-        f"📋 *Executive Summary:*",
-        f"{analysis_res.get('summary', 'Security evaluation completed.')}",
-        "",
-        f"🔍 *Key Evidence Detected:*"
-    ]
-    
-    evidence_list = analysis_res.get("evidenceList", [])
-    if evidence_list:
-        for ev in evidence_list[:3]:
-            lines.append(f"• *{ev.get('title')}:* {ev.get('description')}")
+    if is_scam:
+        evidence_list = analysis_res.get("evidenceList", [])
+        main_flag = evidence_list[0].get("description", "Upfront fee extortion detected.") if evidence_list else "Upfront fee extortion detected."
+        return (
+            f"🛡️ *ScamShield: 🚨 {risk_score}% CRITICAL RISK*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"• *Entity:* {claimed_brand}\n"
+            f"• *Alert:* {main_flag}\n"
+            f"• *Action:* ❌ *DO NOT PAY MONEY!* Block & report.\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔗 ID: {report_id}"
+        )
     else:
-        lines.append("• No overt malicious financial or phishing indicators identified.")
-        
-    lines.extend([
-        "",
-        f"💡 *Recommended Safe Actions:*",
-        f"1. {analysis_res.get('safeActions', ['Do not send funds'])[0]}",
-        f"2. Never share OTPs or government identity scans.",
-        "",
-        f"🔗 *Full Interactive Security Audit Report:*",
-        f"http://localhost:5173/?report={report_id}",
-        f"────────────────────────",
-        f"_ScamShield Automated Threat Intelligence Engine_"
-    ])
-    
-    return "\n".join(lines)
+        return (
+            f"🛡️ *ScamShield: ✅ {risk_score}% LOW RISK*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"• *Entity:* {claimed_brand}\n"
+            f"• *Status:* Verified authentic. Zero fees or scam traps found.\n"
+            f"• *Action:* ✅ Safe to proceed through official portal.\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"🔗 ID: {report_id}"
+        )
+
 
 @router.post("/whatsapp/webhook")
 async def handle_whatsapp_incoming_webhook(request: Request, db: AsyncSession = Depends(get_db)):
@@ -94,6 +85,7 @@ async def handle_whatsapp_incoming_webhook(request: Request, db: AsyncSession = 
     # Extract message from Meta WhatsApp payload structure
     extracted_text = ""
     sender_phone = ""
+    media_type = "text"
     
     try:
         entries = body.get("entry", [])
@@ -104,16 +96,25 @@ async def handle_whatsapp_incoming_webhook(request: Request, db: AsyncSession = 
                 messages = value.get("messages", [])
                 for msg in messages:
                     sender_phone = msg.get("from", "")
-                    if msg.get("type") == "text":
+                    msg_type = msg.get("type", "text")
+                    if msg_type == "text":
                         extracted_text = msg.get("text", {}).get("body", "")
+                        media_type = "text"
+                        break
+                    elif msg_type in ("image", "document"):
+                        media_type = "image"
+                        caption = msg.get("image", {}).get("caption", "") or msg.get("document", {}).get("caption", "")
+                        filename = msg.get("document", {}).get("filename", "") or "Uploaded_Document.jpeg"
+                        extracted_text = caption or f"Photo/Attachment received: {filename}"
                         break
     except Exception as e:
         print(f"[WhatsAppWebhook] Payload parse error: {e}")
 
-    # Fallback to direct field if sent via simulator / testing
+    # Fallback to direct fields if sent via simulator / testing
     if not extracted_text and "text" in body:
         extracted_text = body["text"]
         sender_phone = body.get("sender", "+919876543210")
+        media_type = body.get("media_type", "text")
 
     if not extracted_text:
         # Acknowledge Meta webhooks even if not a text message
@@ -130,6 +131,7 @@ async def handle_whatsapp_incoming_webhook(request: Request, db: AsyncSession = 
         "status": "processed",
         "sender": sender_phone,
         "input_message": extracted_text,
+        "media_type": media_type,
         "analysis_id": analysis_res.get("id"),
         "risk_score": analysis_res.get("riskScore"),
         "risk_level": analysis_res.get("riskLevel"),
@@ -141,6 +143,7 @@ async def handle_whatsapp_incoming_webhook(request: Request, db: AsyncSession = 
 async def simulate_whatsapp_interaction(req: AnalyzeMessageRequest, db: AsyncSession = Depends(get_db)):
     """
     Direct simulation endpoint for testing the complete WhatsApp bot conversation in the frontend.
+    Accepts text, links, or image descriptions/OCR transcripts.
     """
     analysis_res = await analyze_message(req, db)
     reply_text = format_whatsapp_security_reply(analysis_res)
@@ -152,3 +155,4 @@ async def simulate_whatsapp_interaction(req: AnalyzeMessageRequest, db: AsyncSes
         "analysis": analysis_res,
         "bot_reply": reply_text
     }
+

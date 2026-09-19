@@ -1,0 +1,33 @@
+2026/09/19-23:44:30.006 1648 Reusing MANIFEST d:\HACKSPORA 2.0\scamshield\whatsapp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/09/19-23:44:30.006 1648 Recovering log #124
+2026/09/19-23:44:30.016 1648 Reusing old log d:\HACKSPORA 2.0\scamshield\whatsapp\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000124.log 
+2026/09/19-23:44:30.724 1648 Compacting 1@1 + 4@2 files
+2026/09/19-23:44:30.819 1648 Generated table #127@1: 86526 keys, 2263129 bytes
+2026/09/19-23:44:30.912 1648 Generated table #128@1: 33383 keys, 2192727 bytes
+2026/09/19-23:44:30.957 1648 Generated table #129@1: 16211 keys, 2198217 bytes
+2026/09/19-23:44:31.021 1648 Generated table #130@1: 52744 keys, 2230832 bytes
+2026/09/19-23:44:31.032 1648 Generated table #131@1: 9889 keys, 413180 bytes
+2026/09/19-23:44:31.032 1648 Compacted 1@1 + 4@2 files => 9298085 bytes
+2026/09/19-23:44:31.033 1648 compacted to: files[ 0 0 5 0 0 0 0 ]
+2026/09/19-23:44:31.034 1648 Delete type=2 #119
+2026/09/19-23:44:31.034 1648 Delete type=2 #120
+2026/09/19-23:44:31.034 1648 Delete type=2 #121
+2026/09/19-23:44:31.034 1648 Delete type=2 #122
+2026/09/19-23:44:31.034 1648 Delete type=2 #125
+2026/09/19-23:44:36.610 1648 Level-0 table #133: started
+2026/09/19-23:44:36.653 1648 Level-0 table #133: 1064087 bytes OK
+2026/09/19-23:44:36.654 1648 Delete type=0 #124
+2026/09/19-23:44:41.301 1648 Compacting 1@1 + 5@2 files
+2026/09/19-23:44:41.389 1648 Generated table #134@1: 90115 keys, 2243255 bytes
+2026/09/19-23:44:41.457 1648 Generated table #135@1: 37863 keys, 2221618 bytes
+2026/09/19-23:44:41.511 1648 Generated table #136@1: 15105 keys, 2189062 bytes
+2026/09/19-23:44:41.585 1648 Generated table #137@1: 46674 keys, 2229129 bytes
+2026/09/19-23:44:41.602 1648 Generated table #138@1: 17109 keys, 571992 bytes
+2026/09/19-23:44:41.602 1648 Compacted 1@1 + 5@2 files => 9455056 bytes
+2026/09/19-23:44:41.604 1648 compacted to: files[ 0 0 5 0 0 0 0 ]
+2026/09/19-23:44:41.604 1648 Delete type=2 #127
+2026/09/19-23:44:41.604 1648 Delete type=2 #128
+2026/09/19-23:44:41.604 1648 Delete type=2 #129
+2026/09/19-23:44:41.604 1648 Delete type=2 #130
+2026/09/19-23:44:41.604 1648 Delete type=2 #131
+2026/09/19-23:44:41.604 1648 Delete type=2 #133

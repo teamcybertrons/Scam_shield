@@ -4,24 +4,21 @@ import {
   ShieldAlert, 
   Check, 
   ArrowRight, 
-  ExternalLink, 
   ShieldCheck, 
-  Lock, 
-  AlertTriangle,
+  Download, 
+  FolderOpen, 
+  CheckCircle2, 
+  RefreshCw, 
+  Layers, 
+  Maximize2,
   Sparkles,
-  Download,
-  Copy,
-  FolderOpen,
-  CheckCircle2,
-  RefreshCw,
-  Sliders,
-  Terminal,
-  Layers,
-  Code
+  Zap,
+  Smartphone,
+  Eye,
+  CheckCircle
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { ActiveTab, AnalysisResult } from '../../types';
-import { ScamShieldAPI } from '../../services/api';
 
 interface ExtensionMockupProps {
   onOpenReport: (result?: AnalysisResult) => void;
@@ -32,66 +29,7 @@ export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, 
   const [selectedBrowser, setSelectedBrowser] = useState<'chrome' | 'edge' | 'brave'>('chrome');
   const [copiedPath, setCopiedPath] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  
-  // Interactive Live Extension Simulator State
-  const [simUrl, setSimUrl] = useState('https://infosys-careers-apply.xyz/internship-registration');
-  const [isSimAnalyzing, setIsSimAnalyzing] = useState(false);
-  const [simResult, setSimResult] = useState<AnalysisResult | null>({
-    id: 'SCS-EXT-9102',
-    title: 'Phishing Threat: infosys-careers-apply.xyz',
-    targetType: 'URL',
-    targetValue: 'https://infosys-careers-apply.xyz/internship-registration',
-    analyzedAt: 'Just now',
-    riskScore: 91,
-    riskLevel: 'CRITICAL',
-    confidence: 96,
-    summary: 'High-confidence typosquatting and impersonation portal imitating Infosys Ltd with upfront monetary deposit solicitations.',
-    criticalSignalsCount: 2,
-    warningSignalsCount: 1,
-    tags: ['LOOKALIKE_DOMAIN', 'CRITICAL_RISK', 'ADVANCE_FEE_TRAP', 'DISPOSABLE_TLD'],
-    breakdown: {
-      domainRisk: { score: 28, max: 30, label: 'Domain Authenticity Risk', desc: 'Typo-squatted .xyz disposable TLD.' },
-      paymentRisk: { score: 24, max: 25, label: 'Financial Solicitation Risk', desc: 'Demands ₹1,999 upfront deposit.' },
-      identityRisk: { score: 18, max: 20, label: 'Identity & Credential Risk', desc: 'Unverified recruitment channel.' },
-      contentRisk: { score: 13, max: 15, label: 'Social Engineering & Urgency', desc: 'Artificial urgency countdown.' },
-      reputationRisk: { score: 8, max: 10, label: 'Enterprise Reputation Index', desc: 'Unauthorized brand use.' }
-    },
-    evidenceList: [
-      { id: 'e1', category: 'domain', title: 'Suspicious Domain Mismatch', severity: 'CRITICAL', confidence: 98, description: 'Domain infosys-careers-apply.xyz does not match verified official domain infosys.com', detectedQuote: 'infosys-careers-apply.xyz', evidenceSource: 'DNS & Brand Registry', recommendation: 'Do not access this portal.' },
-      { id: 'e2', category: 'payment', title: 'Illegal Upfront Payment Request', severity: 'CRITICAL', confidence: 95, description: 'Mandatory ₹1,999 registration fee requested before selection.', detectedQuote: 'Pay ₹1,999 to confirm your internship seat', evidenceSource: 'Linguistic Classifier', recommendation: 'Legitimate employers never charge application fees.' },
-      { id: 'e3', category: 'identity', title: 'Identity Harvest Risk', severity: 'HIGH', confidence: 92, description: 'Collects sensitive student data on an unencrypted lookalike page.', detectedQuote: 'Full Name, College Name, Payment', evidenceSource: 'Form Analyzer', recommendation: 'Do not submit credentials.' }
-    ],
-    verification: {
-      claimedName: 'Infosys Ltd',
-      claimedDomain: 'infosys.com',
-      observedDomain: 'infosys-careers-apply.xyz',
-      isDomainMatch: false,
-      status: 'SUSPICIOUS_MISMATCH',
-      officialWebsite: 'https://www.infosys.com',
-      officialCareersUrl: 'https://www.infosys.com/careers/',
-      notes: 'Brand Mismatch: Claimed brand is Infosys Ltd but page is hosted on untrusted domain infosys-careers-apply.xyz.'
-    },
-    safeActions: [
-      'Do NOT pay any requested fee or deposit.',
-      'Only apply via official verified portals at https://www.infosys.com/careers/.',
-      'Report this fake website to cybercrime authorities.'
-    ],
-    timeline: [],
-    rawIndicators: { sslValid: false, domainAgeDays: 3, registrar: 'NameCheap Inc.', honeypotMatches: 12, aiToxicityScore: 91, telegramOrWhatsappHop: true, upfrontFeeRequested: true }
-  });
-
-  const handleSimulateInspection = async (testUrl: string) => {
-    setSimUrl(testUrl);
-    setIsSimAnalyzing(true);
-    try {
-      const res = await ScamShieldAPI.analyzeUrl(testUrl);
-      setSimResult(res);
-    } catch {
-      // keep previous
-    } finally {
-      setIsSimAnalyzing(false);
-    }
-  };
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const handleCopyPath = () => {
     navigator.clipboard.writeText('d:\\HACKSPORA 2.0\\scamshield\\extension');
@@ -111,11 +49,11 @@ export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, 
         name: "ScamShield - AI Cybersecurity Threat Detector",
         version: "2.0.0",
         description: "Real-time threat intelligence and deterministic risk analysis protecting students and job seekers against phishing & internship scams.",
-        permissions: ["activeTab", "storage", "tabs"],
+        permissions: ["activeTab", "storage", "tabs", "scripting"],
         host_permissions: [
+          "<all_urls>",
           "http://localhost:8000/*",
-          "http://127.0.0.1:8000/*",
-          "https://*/*"
+          "http://127.0.0.1:8000/*"
         ],
         action: {
           default_popup: "popup.html",
@@ -133,87 +71,64 @@ export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, 
         ]
       }, null, 2));
 
-      // Service Worker
-      zip.file('background.js', `// ScamShield Manifest V3 Background Service Worker
-const API_BASE_URL = "http://localhost:8000/api";
-
+      // Background Service Worker
+      zip.file('background.js', `// ScamShield Background Service Worker
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("[ScamShield Extension] Background Service Worker installed.");
-  chrome.action.setBadgeBackgroundColor({ color: "#06B6D4" });
-  chrome.action.setBadgeText({ text: "ON" });
+  console.log("ScamShield Extension v2.0 Installed Successfully");
 });
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url && tab.url.startsWith("http")) {
-    inspectTabSecurity(tabId, tab.url);
-  }
-});
-
-async function inspectTabSecurity(tabId, url) {
-  try {
-    const response = await fetch(\`\${API_BASE_URL}/analyze/url\`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: url })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const score = data.riskScore;
-      let badgeColor = "#10B981";
-      let badgeText = "SAFE";
-
-      if (score >= 80) {
-        badgeColor = "#EF4444";
-        badgeText = "CRIT";
-      } else if (score >= 55) {
-        badgeColor = "#F97316";
-        badgeText = "HIGH";
-      } else if (score >= 25) {
-        badgeColor = "#F59E0B";
-        badgeText = "WARN";
-      }
-
-      chrome.action.setBadgeText({ text: badgeText, tabId: tabId });
-      chrome.action.setBadgeBackgroundColor({ color: badgeColor, tabId: tabId });
-      chrome.storage.local.set({ [url]: data });
-    }
-  } catch (err) {
-    console.warn("[ScamShield Extension] Backend inspection offline or unreachable:", err);
-  }
-}`);
+`);
 
       // Content Script
-      zip.file('content.js', `// ScamShield Page DOM Telemetry Extractor
+      zip.file('content.js', `// ScamShield Content Script for Active DOM & Screen Inspection
 (() => {
-  function scanPageDOM() {
-    const text = document.body ? document.body.innerText : "";
-    const forms = document.querySelectorAll("form");
-    const paymentKeywords = ["upi", "gpay", "phonepe", "paytm", "deposit", "security fee", "registration fee", "caution fee", "refundable"];
-    
-    let detectedSignals = [];
-    const lowerText = text.toLowerCase();
-    for (const kw of paymentKeywords) {
-      if (lowerText.includes(kw)) {
-        detectedSignals.push(\`Keyword: \${kw}\`);
+  function extractScreenText() {
+    let textPieces = [];
+    const currentUrl = window.location.href;
+    const currentHost = window.location.hostname;
+    const title = document.title || "";
+    textPieces.push(title);
+
+    const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute('content') || "";
+    if (metaDesc) textPieces.push(metaDesc);
+
+    document.querySelectorAll('img, [role="img"], [data-testid*="caption"], [aria-label], [title], a[download]').forEach(el => {
+      const alt = el.getAttribute('alt') || '';
+      const aria = el.getAttribute('aria-label') || '';
+      const titleAttr = el.getAttribute('title') || '';
+      const downloadAttr = el.getAttribute('download') || '';
+      const srcAttr = el.getAttribute('src') || '';
+      if (alt && alt.length > 2) textPieces.push(alt);
+      if (aria && aria.length > 2) textPieces.push(aria);
+      if (titleAttr && titleAttr.length > 2) textPieces.push(titleAttr);
+      if (downloadAttr && downloadAttr.length > 2) textPieces.push(downloadAttr);
+      if (srcAttr && srcAttr.length > 5 && !srcAttr.startsWith('data:') && !srcAttr.startsWith('blob:')) {
+        textPieces.push(srcAttr);
       }
+    });
+
+    if (document.body) {
+      const bodyText = document.body.innerText || "";
+      textPieces.push(bodyText);
     }
 
-    if (forms.length > 0 && detectedSignals.length > 0) {
-      chrome.runtime.sendMessage({
-        type: "SCAMSHIELD_PAGE_TELEMETRY",
-        url: window.location.href,
-        signals: detectedSignals,
-        formsCount: forms.length
-      });
-    }
+    let combined = textPieces.join(" ").replace(/\\s+/g, " ").trim();
+
+    return {
+      url: currentUrl,
+      host: currentHost,
+      title: title,
+      metaDescription: metaDesc,
+      pageText: combined.slice(0, 8000),
+      textLength: combined.length
+    };
   }
 
-  if (document.readyState === "complete") {
-    scanPageDOM();
-  } else {
-    window.addEventListener("load", scanPageDOM);
-  }
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "SCAN_SCREEN" || request.action === "GET_DOM_TELEMETRY" || request.action === "GET_PAGE_CONTENT") {
+      sendResponse(extractScreenText());
+      return true;
+    }
+  });
 })();`);
 
       // Popup HTML
@@ -221,75 +136,157 @@ async function inspectTabSecurity(tabId, url) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ScamShield</title>
+  <title>ScamShield AI Security Inspector</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="header">
-    <div class="logo-box">🛡️ <strong>ScamShield</strong></div>
-    <div id="statusBadge" class="status-badge">Inspecting...</div>
+  <div class="popup-container">
+    <header class="header">
+      <div class="logo-box">
+        <div class="shield-dot"></div>
+        <span class="logo-title">SCAMSHIELD</span>
+      </div>
+      <span class="version-tag">AI LIVE</span>
+    </header>
+
+    <main class="main-content" id="content">
+      <div class="hero-action-box">
+        <button id="scanScreenBtn" class="scan-screen-btn" type="button">
+          <span class="btn-icon">⚡</span>
+          <span class="btn-label">
+            <strong>Scan Current Screen</strong>
+            <small>Extract page text & detect risks with AI</small>
+          </span>
+        </button>
+      </div>
+
+      <div class="quick-scan-bar">
+        <input type="text" id="customUrlInput" placeholder="Or paste link / offer text to verify..." />
+        <button id="scanCustomBtn" type="button">Scan</button>
+      </div>
+
+      <div class="idle-state" id="idleCard">
+        <div class="idle-icon">🛡️</div>
+        <div class="idle-title">Ready for Screen Scan</div>
+        <p class="idle-desc">Click the button above to inspect visible page text with AI.</p>
+        <div class="idle-features">
+          <span class="idle-chip">✓ Upfront Fee Extraction</span>
+          <span class="idle-chip">✓ Brand & Domain Match</span>
+          <span class="idle-chip">✓ Telegram/Chat Traps</span>
+        </div>
+      </div>
+
+      <div class="loading-state hidden" id="loading">
+        <div class="spinner"></div>
+        <p class="loading-text" id="loadingText">Extracting on-screen text...</p>
+        <div class="loading-sub" id="loadingSub">Running AI linguistic analysis</div>
+      </div>
+
+      <div class="result-box hidden" id="result">
+        <div class="screen-meta-badge" id="screenMetaBadge">
+          <span class="meta-icon">🖥️</span>
+          <span class="meta-text" id="targetUrl">https://example.com</span>
+        </div>
+        
+        <div class="score-card" id="scoreCard">
+          <div class="score-number" id="riskScore">--</div>
+          <div class="score-details">
+            <div class="score-level" id="riskLevel">ANALYZING</div>
+            <div class="confidence-tag" id="confidence">98% AI Confidence</div>
+          </div>
+        </div>
+
+        <div class="brand-status" id="brandStatus">
+          <span class="status-indicator" id="statusDot"></span>
+          <span id="brandText">Verified Official Domain</span>
+        </div>
+
+        <div class="summary-box" id="summaryText">
+          AI linguistic and endpoint forensic analysis completed.
+        </div>
+
+        <div class="evidence-section">
+          <div class="section-title">AI DETECTION EVIDENCE</div>
+          <div class="evidence-list" id="evidenceList"></div>
+        </div>
+
+        <div class="actions-group">
+          <button class="open-report-btn" id="openReportBtn" type="button">Open Full Security Report ↗</button>
+        </div>
+      </div>
+
+      <div class="error-state hidden" id="errorBox">
+        <div class="error-title">Inspection Issue</div>
+        <p class="error-desc" id="errorDesc">Could not analyze current screen.</p>
+        <button class="retry-btn" id="retryBtn" type="button">Retry Screen Scan</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>AI Risk Engine</span>
+      <span class="status-live">● SOC Active</span>
+    </footer>
   </div>
-  <div class="card">
-    <div class="score-row">
-      <span class="score-label">Risk Score</span>
-      <span id="scoreValue" class="score-value">--/100</span>
-    </div>
-    <div id="summaryText" class="summary">Analyzing tab security...</div>
-  </div>
-  <div class="actions">
-    <button id="openReportBtn" class="btn">View Full Forensics Report</button>
-  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>`);
 
       // Popup CSS
-      zip.file('popup.css', `body {
-  width: 320px;
-  background-color: #030712;
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-  margin: 0;
-  padding: 16px;
-  box-sizing: border-box;
-}
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.logo-box { color: #38bdf8; font-size: 14px; font-weight: bold; }
-.status-badge { font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; background: #06b6d4; color: #020617; }
-.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-.score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.score-label { font-size: 12px; color: #94a3b8; }
-.score-value { font-size: 18px; font-weight: bold; color: #38bdf8; }
-.summary { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
-.btn { width: 100%; padding: 10px; border-radius: 6px; background: #06b6d4; color: #020617; font-weight: bold; border: none; cursor: pointer; }
-.btn:hover { background: #38bdf8; }`);
-
-      // Popup JS
-      zip.file('popup.js', `document.addEventListener("DOMContentLoaded", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab || !tab.url) return;
-
-  try {
-    const res = await fetch("http://localhost:8000/api/analyze/url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: tab.url })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      document.getElementById("scoreValue").innerText = data.riskScore + " / 100";
-      document.getElementById("summaryText").innerText = data.summary;
-      const badge = document.getElementById("statusBadge");
-      badge.innerText = data.riskLevel;
-      badge.style.background = data.riskScore >= 80 ? "#EF4444" : (data.riskScore >= 55 ? "#F97316" : "#10B981");
-      document.getElementById("openReportBtn").onclick = () => {
-        chrome.tabs.create({ url: "http://localhost:5173/?report=" + data.id });
-      };
-    }
-  } catch (e) {
-    document.getElementById("summaryText").innerText = "Make sure FastAPI backend is active on http://localhost:8000";
-  }
-});`);
+      zip.file('popup.css', `* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; padding: 0; background-color: #030712; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; display: block; }
+.popup-container { width: 350px; display: flex; flex-direction: column; background-color: #030712; overflow: hidden; }
+.header { width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 16px; background: #0b0f19; border-bottom: 1px solid rgba(6, 182, 212, 0.25); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
+.logo-box { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+.shield-dot { width: 8px; height: 8px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 10px #06b6d4; flex-shrink: 0; }
+.logo-title { font-weight: 800; letter-spacing: 0.08em; color: #38bdf8; font-size: 13px; line-height: 1; }
+.version-tag { font-size: 10px; font-family: monospace; background: rgba(6, 182, 212, 0.15); color: #22d3ee; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(6, 182, 212, 0.3); line-height: 1.2; }
+.main-content { width: 100%; display: flex; flex-direction: column; padding: 12px 14px; background-color: #030712; }
+.hero-action-box { width: 100%; margin-bottom: 10px; }
+.scan-screen-btn { width: 100%; display: flex; flex-direction: row; align-items: center; gap: 12px; background: linear-gradient(135deg, #06b6d4 0%, #0284c7 50%, #2563eb 100%); border: 1.5px solid #38bdf8; border-radius: 10px; padding: 10px 14px; color: #ffffff; cursor: pointer; box-shadow: 0 4px 16px rgba(6, 182, 212, 0.35); transition: all 0.2s; text-align: left; }
+.scan-screen-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.55); border-color: #67e8f9; }
+.btn-icon { font-size: 20px; background: rgba(255, 255, 255, 0.22); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; box-shadow: 0 0 8px rgba(255, 255, 255, 0.25); }
+.btn-label { display: flex; flex-direction: column; }
+.btn-label strong { font-size: 13px; font-weight: 800; color: #ffffff; }
+.btn-label small { font-size: 10px; color: #e0f2fe; opacity: 0.95; }
+.quick-scan-bar { width: 100%; display: flex; flex-direction: row; gap: 6px; margin-bottom: 10px; }
+.quick-scan-bar input { flex: 1; background: #0b1120; border: 1px solid #1e293b; color: #f8fafc; font-size: 11px; padding: 7px 10px; border-radius: 6px; outline: none; }
+.quick-scan-bar button { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 6px; font-weight: 700; font-size: 11px; padding: 7px 12px; cursor: pointer; }
+.quick-scan-bar button:hover { background: #06b6d4; color: #020617; }
+.idle-state { width: 100%; text-align: center; padding: 20px 14px; background: rgba(15, 23, 42, 0.75); border: 1px dashed rgba(56, 189, 248, 0.25); border-radius: 10px; margin-bottom: 6px; }
+.idle-icon { font-size: 26px; margin-bottom: 6px; }
+.idle-title { font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 4px; }
+.idle-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; margin-bottom: 10px; }
+.idle-features { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.idle-chip { font-size: 10px; font-family: monospace; color: #38bdf8; background: rgba(6, 182, 212, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(6, 182, 212, 0.2); }
+.loading-state { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0; gap: 8px; }
+.spinner { width: 26px; height: 26px; border: 3px solid rgba(6, 182, 212, 0.2); border-top-color: #06b6d4; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 12px; font-weight: 600; color: #38bdf8; }
+.loading-sub { font-size: 10px; color: #64748b; font-family: monospace; }
+.screen-meta-badge { display: flex; flex-direction: row; align-items: center; gap: 6px; font-family: monospace; font-size: 11px; color: #94a3b8; background: rgba(15, 23, 42, 0.9); padding: 6px 10px; border-radius: 6px; border: 1px solid #1e293b; margin-bottom: 8px; overflow: hidden; }
+.screen-meta-badge .meta-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.summary-box { font-size: 11px; color: #cbd5e1; line-height: 1.4; padding: 8px 10px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; margin-bottom: 8px; }
+.score-card { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; margin-bottom: 8px; }
+.score-number { font-size: 24px; font-weight: 900; font-family: monospace; color: #38bdf8; line-height: 1; }
+.score-details { display: flex; flex-direction: column; gap: 2px; }
+.score-level { font-size: 11px; font-weight: 800; font-family: monospace; }
+.confidence-tag { font-size: 10px; color: #64748b; font-family: monospace; }
+.brand-status { display: flex; flex-direction: row; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #f1f5f9; padding: 6px 10px; background: #0b1120; border-radius: 6px; border: 1px solid #1e293b; margin-bottom: 8px; }
+.status-indicator { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+.evidence-section { margin-bottom: 10px; }
+.section-title { font-size: 10px; font-family: monospace; color: #64748b; margin-bottom: 4px; }
+.evidence-list { display: flex; flex-direction: column; gap: 4px; }
+.evidence-chip { font-size: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 3px solid #ef4444; padding: 4px 8px; border-radius: 4px; }
+.evidence-chip.warning { border-color: rgba(245, 158, 11, 0.3); border-left-color: #f59e0b; }
+.evidence-chip.clean { border-color: rgba(16, 185, 129, 0.3); border-left-color: #10b981; color: #10b981; }
+.actions-group { display: flex; flex-direction: column; gap: 6px; }
+.open-report-btn { width: 100%; background: #0b1120; color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.4); border-radius: 6px; padding: 7px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.open-report-btn:hover { background: rgba(6, 182, 212, 0.15); }
+.hidden { display: none !important; }
+.footer { width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 16px; background: #0b0f19; border-top: 1px solid #1e293b; font-size: 10px; font-family: monospace; color: #64748b; }
+.status-live { color: #10b981; }
+`);
 
       // Readme instructions in the zip
       zip.file('README_INSTALL.txt', `SCAMSHIELD CHROME / BRAVE / EDGE EXTENSION INSTALLATION:
@@ -299,14 +296,10 @@ async function inspectTabSecurity(tabId, url) {
    - Edge:   edge://extensions
    - Brave:  brave://extensions
 
-2. Turn on the "Developer mode" toggle switch in the top-right corner.
-
-3. Click the "Load unpacked" button in the top-left corner.
-
-4. Select the folder containing these extracted extension files.
-
-5. ScamShield is now installed! Pin the shield icon to your toolbar.
-   Whenever you visit any job portal, ScamShield automatically inspects the domain and alerts you to scam risks.`);
+2. Turn on "Developer mode" (toggle in top-right corner).
+3. Click "Load unpacked" (top-left).
+4. Select this extracted folder.
+5. Click "⚡ Scan Current Screen" in the popup to inspect any job page with AI!`);
 
       // Generate zip blob and trigger download
       const content = await zip.generateAsync({ type: 'blob' });
@@ -447,169 +440,109 @@ async function inspectTabSecurity(tabId, url) {
         </div>
       </div>
 
-      {/* Live Interactive Extension Tester & Browser Simulation */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Real Screenshot Live Showcase Section */}
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-cyan-400" />
-              <span>Interactive Extension Live Tester</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
+                LIVE PRODUCTION SCREENSHOT • REAL-TIME AI AUDIT
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1">
+              ScamShield Extension In-Action (WhatsApp Web & Screen OCR)
             </h3>
-            <p className="text-xs text-slate-400">
-              Type any URL below to see how the ScamShield extension audits pages and alerts the user in real time.
+            <p className="text-xs sm:text-sm text-slate-400">
+              Direct capture of ScamShield AI Extension executing real-time screen extraction and offer letter verification on WhatsApp Web.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>19/100 LOW RISK VERIFIED</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Premium High-Definition Screenshot Container */}
+        <div className="rounded-2xl bg-slate-950 border-2 border-cyan-500/40 shadow-2xl shadow-cyan-950/40 overflow-hidden relative group">
+          {/* Screenshot Image */}
+          <div 
+            onClick={() => setIsImageModalOpen(true)}
+            className="cursor-pointer overflow-hidden relative flex items-center justify-center bg-slate-950 p-2 sm:p-3"
+          >
+            <img 
+              src="/extension_whatsapp_live_screenshot.png" 
+              alt="ScamShield Browser Extension Live on WhatsApp Web" 
+              className="w-full h-auto rounded-xl object-contain shadow-2xl border border-slate-800/80 transition-transform duration-300 group-hover:scale-[1.01]"
+            />
+            
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-8 pointer-events-none">
+              <span className="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono uppercase tracking-wider shadow-2xl flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                <span>Click to View High-Resolution Full Image</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Core Capabilities of the Live Extension */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <Zap className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-bold text-white font-mono">1-Click Screen & OCR Extraction</h4>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              Extracts text from open WhatsApp chats, candidate portals, PDFs, and job listings directly without downloading or manual re-typing.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-bold text-emerald-300 font-mono">Authentic vs Fake Accuracy</h4>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              Correctly validates genuine offer letters (such as Wealth Bank / NovaTech Solutions, 19/100 Low Risk) and catches advance-fee fraud.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+              <Layers className="w-5 h-5" />
+            </div>
+            <h4 className="text-sm font-bold text-white font-mono">Direct Forensic Deep Dives</h4>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              "Open Full Security Report" bridges directly to comprehensive DNS verification, linguistic scoring, and safe mitigation actions.
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Realistic Browser Frame Simulation */}
-        <div className="rounded-2xl bg-slate-950 border border-slate-700 shadow-2xl overflow-hidden relative">
-          
-          {/* Top Browser Bar */}
-          <div className="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-              <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-              <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-            </div>
-
-            {/* Interactive URL Input Bar */}
-            <div className="flex-1 max-w-2xl bg-slate-950 rounded-lg px-3 py-1.5 flex items-center gap-2 text-xs font-mono border border-slate-800 focus-within:border-cyan-400">
-              <span className="text-slate-400">https://</span>
-              <input
-                type="text"
-                value={simUrl.replace(/^https?:\/\//, '')}
-                onChange={(e) => setSimUrl(`https://${e.target.value.replace(/^https?:\/\//, '')}`)}
-                className="flex-1 bg-transparent text-white outline-none font-mono"
-                placeholder="domain.com/path"
-              />
-              <button
-                onClick={() => handleSimulateInspection(simUrl)}
-                disabled={isSimAnalyzing}
-                className="px-2.5 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-[10px] tracking-wider uppercase transition cursor-pointer"
-              >
-                {isSimAnalyzing ? 'Analyzing...' : 'Audit'}
-              </button>
-            </div>
-
-            {/* Extension Icon in Toolbar */}
-            <div className="flex items-center gap-2">
-              <div className={`px-2 py-1 rounded-lg border text-xs font-mono font-bold flex items-center gap-1 ${
-                (simResult?.riskScore || 0) >= 80 
-                  ? 'bg-rose-500/20 border-rose-500 text-rose-400'
-                  : ((simResult?.riskScore || 0) >= 55 
-                      ? 'bg-orange-500/20 border-orange-500 text-orange-400' 
-                      : 'bg-emerald-500/20 border-emerald-500 text-emerald-400')
-              }`}>
-                <ShieldAlert className="w-3.5 h-3.5" />
-                <span>{simResult?.riskScore ?? 0}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Webpage Simulation Content */}
-          <div className="p-6 sm:p-10 bg-gradient-to-b from-[#090e1c] to-[#040711] min-h-[460px] relative">
-            
-            {/* Simulated Page Background */}
-            <div className="max-w-xl space-y-5 opacity-70">
-              <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/80">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-200">
-                    {simResult?.verification?.claimedName || 'Corporate Careers Portal'}
-                  </span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                    simResult?.verification?.status === 'VERIFIED'
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                  }`}>
-                    {simResult?.verification?.status || 'UNVERIFIED'}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400">
-                  Application review and candidate assessment intake.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-xl border border-slate-800 bg-slate-900/90 space-y-3">
-                <div className="h-4 bg-slate-800 rounded w-1/3" />
-                <div className="h-3 bg-slate-800/60 rounded w-2/3" />
-                <div className="h-8 bg-slate-800/40 rounded w-full" />
-              </div>
-            </div>
-
-            {/* Overlaid Real Extension Popup Window */}
-            <div className="absolute top-6 right-6 sm:right-10 w-80 rounded-2xl bg-gradient-to-b from-[#0c1326] to-[#060a15] border-2 border-cyan-500/50 p-5 shadow-2xl backdrop-blur-xl z-20 space-y-4">
-              
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-white font-mono block">SCAMSHIELD</span>
-                    <span className="text-[9px] text-slate-400 font-mono">v2.0 • Active Tab</span>
-                  </div>
-                </div>
-                
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                  (simResult?.riskScore || 0) >= 80 
-                    ? 'bg-rose-500 text-white' 
-                    : ((simResult?.riskScore || 0) >= 55 ? 'bg-orange-500 text-white' : 'bg-emerald-500 text-slate-950')
-                }`}>
-                  {simResult?.riskLevel || 'EVALUATING'}
-                </span>
-              </div>
-
-              <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                (simResult?.riskScore || 0) >= 80 
-                  ? 'bg-rose-950/40 border-rose-500/30' 
-                  : ((simResult?.riskScore || 0) >= 55 ? 'bg-orange-950/40 border-orange-500/30' : 'bg-emerald-950/40 border-emerald-500/30')
-              }`}>
-                <div>
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block">Forensic Risk Score</span>
-                  <span className="text-sm font-bold text-white font-mono">{simResult?.riskLevel} RISK</span>
-                </div>
-                <div className={`text-2xl font-extrabold font-mono ${
-                  (simResult?.riskScore || 0) >= 80 ? 'text-rose-400' : ((simResult?.riskScore || 0) >= 55 ? 'text-orange-400' : 'text-emerald-400')
-                }`}>
-                  {simResult?.riskScore ?? 0} <span className="text-xs text-slate-400 font-normal">/100</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
-                {simResult?.summary || 'Analyzing opportunity payload against live threat feeds...'}
-              </p>
-
-              {/* Evidence Signals */}
-              {simResult?.evidenceList && simResult.evidenceList.length > 0 && (
-                <div className="space-y-1.5 text-xs font-mono pt-1">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                    Detected Signals:
-                  </span>
-                  {simResult.evidenceList.slice(0, 2).map((ev, i) => (
-                    <div key={i} className="flex items-center gap-2 text-slate-300 text-[11px]">
-                      <Check className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
-                      <span className="truncate">{ev.title}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  if (simResult) {
-                    onOpenReport(simResult);
-                  }
-                }}
-                className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/30"
-              >
-                <span>View Full Forensic Report</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
+      {/* Lightbox Fullscreen Modal */}
+      {isImageModalOpen && (
+        <div 
+          onClick={() => setIsImageModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 cursor-zoom-out"
+        >
+          <div className="relative max-w-6xl w-full max-h-[90vh] flex flex-col items-center">
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute -top-10 right-0 text-slate-400 hover:text-white font-mono text-sm px-3 py-1 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer"
+            >
+              ✕ Close
+            </button>
+            <img 
+              src="/extension_whatsapp_live_screenshot.png" 
+              alt="ScamShield Browser Extension Full Screen Preview" 
+              className="max-h-[85vh] w-auto max-w-full rounded-xl object-contain border border-cyan-500/40 shadow-2xl"
+            />
           </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

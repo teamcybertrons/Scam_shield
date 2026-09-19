@@ -7,6 +7,7 @@ SUSPICIOUS_TLDS = {
 }
 
 KNOWN_ENTERPRISE_BRANDS = {
+    "paypal": "paypal.com",
     "infosys": "infosys.com",
     "tcs": "tcs.com",
     "tataconsultancy": "tcs.com",
@@ -24,7 +25,22 @@ KNOWN_ENTERPRISE_BRANDS = {
     "pwc": "pwc.com",
     "kpmg": "kpmg.com",
     "ibm": "ibm.com",
-    "oracle": "oracle.com"
+    "oracle": "oracle.com",
+    "chase": "chase.com",
+    "wellsfargo": "wellsfargo.com",
+    "bankofamerica": "bankofamerica.com",
+    "sbi": "onlinesbi.sbi",
+    "hdfc": "hdfcbank.com",
+    "icici": "icicibank.com",
+    "stripe": "stripe.com",
+    "razorpay": "razorpay.com",
+    "paytm": "paytm.com",
+    "phonepe": "phonepe.com",
+    "binance": "binance.com",
+    "coinbase": "coinbase.com",
+    "linkedin": "linkedin.com",
+    "telegram": "telegram.org",
+    "whatsapp": "whatsapp.com"
 }
 
 class URLAnalyzer:
@@ -77,10 +93,10 @@ class URLAnalyzer:
                 "severity": "HIGH",
                 "confidence": 88,
                 "description": f"The domain uses the '.{tld}' top-level domain frequently associated with disposable phishing infrastructure.",
-                "recommendation": "Verify why an established enterprise would host official recruitment on a cheap disposable TLD."
+                "recommendation": "Verify why an established enterprise would host official services on a cheap disposable TLD."
             })
             
-        # 3. Brand Lookalike / Typosquatting / Hyphenation Check
+        # 3. Brand Lookalike / Typosquatting / Multi-Subdomain Phishing Tunnel
         for brand, official_domain in KNOWN_ENTERPRISE_BRANDS.items():
             if brand in hostname:
                 targeted_brand = brand.capitalize()
@@ -91,13 +107,31 @@ class URLAnalyzer:
                     domain_risk_score += 30
                     signals.append({
                         "category": "domain",
-                        "title": f"Brand Impersonation / Lookalike Domain ({targeted_brand})",
+                        "title": f"Brand Impersonation / Phishing Domain ({targeted_brand})",
                         "severity": "CRITICAL",
                         "confidence": 98,
-                        "description": f"Hostname '{hostname}' contains '{brand}' but does not resolve to the genuine domain '{official_domain}'.",
-                        "recommendation": f"Official careers for {targeted_brand} are hosted exclusively at https://{official_domain}."
+                        "description": f"Hostname '{hostname}' contains '{brand}' but does not resolve to the genuine domain '{official_domain}'. Host is an illegitimate spoofed endpoint.",
+                        "recommendation": f"Official services for {targeted_brand} are hosted exclusively at https://{official_domain}."
                     })
                 break
+
+        # 3.1 Subdomain Phishing Tunnel Check (e.g. login.webscr.paypal.com.us.attacker.com)
+        phishing_subdomain_keywords = ["webscr", "cgi-bin", "login", "signin", "submit", "auth", "account", "verify", "banking", "wallet"]
+        has_phishing_subdomain = any(kw in hostname for kw in phishing_subdomain_keywords)
+        if (len(parts) >= 4 or has_phishing_subdomain) and not is_lookalike:
+            for brand, official_domain in KNOWN_ENTERPRISE_BRANDS.items():
+                if brand in hostname and not (hostname == official_domain or hostname.endswith("." + official_domain)):
+                    is_lookalike = True
+                    domain_risk_score += 30
+                    signals.append({
+                        "category": "domain",
+                        "title": f"Multi-Level Phishing Subdomain Tunnel ({brand.capitalize()})",
+                        "severity": "CRITICAL",
+                        "confidence": 99,
+                        "description": f"URL exhibits complex multi-tiered subdomain chaining masquerading as '{brand}'.",
+                        "recommendation": "Do not enter credentials or complete authentication on third-party spoofed subdomains."
+                    })
+                    break
                 
         # 4. Homoglyphs & Leetspeak (e.g. g00gle, 1nfosys, paypa1)
         homoglyph_patterns = [
@@ -105,6 +139,7 @@ class URLAnalyzer:
             (r"1nf[o0]sys", "infosys"),
             (r"micr[o0]s[o0]ft", "microsoft"),
             (r"amaz[o0]n", "amazon"),
+            (r"paypa[1l][1l]?", "paypal"),
             (r"tc[s5]-", "tcs")
         ]
         for pattern, brand_name in homoglyph_patterns:
@@ -122,14 +157,14 @@ class URLAnalyzer:
                 break
 
         # 5. Excessive Subdomains or Hyphen chaining
-        if len(parts) > 3 or hostname.count("-") >= 2:
-            domain_risk_score += 10
+        if (len(parts) > 3 or hostname.count("-") >= 2) and not is_lookalike:
+            domain_risk_score += 15
             signals.append({
                 "category": "domain",
-                "title": "Complex / Hyphenated Hostname Obfuscation",
-                "severity": "MEDIUM",
-                "confidence": 75,
-                "description": f"Domain contains {hostname.count('-')} hyphens and multiple nested subdomains commonly seen in automated phishing kits.",
+                "title": "Complex Subdomain / Hostname Obfuscation",
+                "severity": "HIGH",
+                "confidence": 85,
+                "description": f"Domain contains {len(parts)} nested subdomain levels and multiple hyphens commonly used in phishing kits.",
                 "recommendation": "Inspect root domain ownership before interacting."
             })
             

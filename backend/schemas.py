@@ -47,6 +47,7 @@ class TimelineStepSchema(BaseModel):
 class AnalyzeUrlRequest(BaseModel):
     url: str = Field(..., example="https://infosys-careers.top/internship-registration")
     claimed_organization: Optional[str] = None
+    page_content: Optional[str] = None
 
 class AnalyzeMessageRequest(BaseModel):
     text: str = Field(..., example="Congratulations! You are shortlisted for Infosys Remote Internship. Pay ₹2500 laptop fee.")

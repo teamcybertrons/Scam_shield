@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Check, Loader2, Cpu, Database, Globe, CreditCard, Sparkles } from 'lucide-react';
 
 interface ScanningAnimationProps {
-  onComplete: () => void;
+  onComplete?: () => void;
   targetValue: string;
 }
 
@@ -10,12 +10,12 @@ export const ScanningAnimation: React.FC<ScanningAnimationProps> = ({ onComplete
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const steps = [
-    { title: 'Extracting indicators & network headers', icon: Globe, detail: 'Parsing IP 194.26.29.110, ASN routing, WHOIS creation dates...' },
-    { title: 'Inspecting URL redirects & SSL certificate chain', icon: Shield, detail: 'Traversing 3 HTTP hops, checking CRL revocation & issuer certificates...' },
-    { title: 'Analyzing NLP urgency triggers & payment intents', icon: CreditCard, detail: 'Scanning for UPI IDs, upfront seat deposits, registration fees...' },
-    { title: 'Checking authoritative corporate identity signals', icon: Database, detail: 'Cross-verifying claimed enterprise against official DNS & trademark databases...' },
-    { title: 'Evaluating multi-vector neural risk engine', icon: Cpu, detail: 'Synthesizing 7 security vectors; computing confidence interval...' },
-    { title: 'Generating cryptographic evidence report', icon: Sparkles, detail: 'Formatting risk breakdown, evidence quotes, and safe action checklist...' },
+    { title: 'Extracting indicators & network headers', icon: Globe, detail: 'Parsing ASN routing, TLS cipher suite, WHOIS registration details...' },
+    { title: 'Inspecting URL redirects & SSL certificate chain', icon: Shield, detail: 'Traversing HTTP hops, checking CRL revocation & certificate transparency logs...' },
+    { title: 'Analyzing NLP urgency triggers & payment intents', icon: CreditCard, detail: 'Scanning for UPI IDs, upfront seat deposits, advance registration fees...' },
+    { title: 'Checking authoritative corporate identity signals', icon: Database, detail: 'Cross-verifying claimed enterprise against official DNS, trademarks, & verified directories...' },
+    { title: 'Evaluating multi-vector neural risk engine', icon: Cpu, detail: 'Synthesizing forensic security vectors; computing calibrated threat score...' },
+    { title: 'Generating cryptographic evidence report', icon: Sparkles, detail: 'Formatting risk breakdown, verified evidence quotes, and safe action checklist...' },
   ];
 
   useEffect(() => {
@@ -25,11 +25,13 @@ export const ScanningAnimation: React.FC<ScanningAnimationProps> = ({ onComplete
           return prev + 1;
         } else {
           clearInterval(timer);
-          setTimeout(onComplete, 600);
+          if (onComplete) {
+            setTimeout(onComplete, 400);
+          }
           return prev;
         }
       });
-    }, 450);
+    }, 320);
 
     return () => clearInterval(timer);
   }, [onComplete, steps.length]);

@@ -66,6 +66,62 @@ VERIFIED_ENTERPRISE_REGISTRY = {
         "cin_or_reg": "US-NJ-0100720448",
         "verified_hiring_policy": "Cognizant official recruitment takes place through careers.cognizant.com.",
         "domains": ["cognizant.com", "careers.cognizant.com"]
+    },
+    "paypal": {
+        "official_name": "PayPal Holdings, Inc.",
+        "official_domain": "paypal.com",
+        "official_careers": "https://careers.pypl.com/",
+        "cin_or_reg": "US-DE-5674390",
+        "verified_hiring_policy": "PayPal authentication and payments are strictly processed on verified paypal.com domains. Never submit credentials on lookalike domains.",
+        "domains": ["paypal.com", "paypalobjects.com", "pypl.com"]
+    },
+    "apple": {
+        "official_name": "Apple Inc.",
+        "official_domain": "apple.com",
+        "official_careers": "https://jobs.apple.com/",
+        "cin_or_reg": "US-CA-C0806592",
+        "verified_hiring_policy": "Apple never requires payment for applications or interview equipment.",
+        "domains": ["apple.com", "jobs.apple.com"]
+    },
+    "meta": {
+        "official_name": "Meta Platforms, Inc.",
+        "official_domain": "meta.com",
+        "official_careers": "https://www.metacareers.com/",
+        "cin_or_reg": "US-DE-3838355",
+        "verified_hiring_policy": "Meta only recruits through official metacareers.com portal.",
+        "domains": ["meta.com", "metacareers.com", "facebook.com"]
+    },
+    "netflix": {
+        "official_name": "Netflix, Inc.",
+        "official_domain": "netflix.com",
+        "official_careers": "https://jobs.netflix.com/",
+        "cin_or_reg": "US-DE-2741913",
+        "verified_hiring_policy": "Netflix does not charge applicants or use third-party messaging handles.",
+        "domains": ["netflix.com", "jobs.netflix.com"]
+    },
+    "sbi": {
+        "official_name": "State Bank of India",
+        "official_domain": "onlinesbi.sbi",
+        "official_careers": "https://sbi.co.in/careers",
+        "cin_or_reg": "IN-SBI-0001",
+        "verified_hiring_policy": "SBI recruitment is hosted exclusively on sbi.co.in/careers. No fee collection via personal UPI.",
+        "domains": ["onlinesbi.sbi", "sbi.co.in", "bank.sbi"]
+    },
+    "hdfc": {
+        "official_name": "HDFC Bank Limited",
+        "official_domain": "hdfcbank.com",
+        "official_careers": "https://www.hdfcbank.com/careers",
+        "cin_or_reg": "L65920MH1994PLC080618",
+        "verified_hiring_policy": "HDFC Bank does not charge candidates for interviews or offers.",
+        "domains": ["hdfcbank.com"]
+    },
+    "icici": {
+        "official_name": "ICICI Bank Limited",
+        "official_domain": "icicibank.com",
+        "official_careers": "https://www.icicicareers.com/",
+        "cin_or_reg": "L24299PB1994PLC034789",
+        "verified_hiring_policy": "ICICI Bank recruitment is conducted solely on icicicareers.com.",
+        "domains": ["icicibank.com", "icicicareers.com"]
     }
 }
 

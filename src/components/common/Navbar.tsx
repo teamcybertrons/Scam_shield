@@ -77,12 +77,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'Platform Overview', desc: 'Main dashboard & interactive security preview', icon: Sparkles },
     { id: 'scanner', label: 'Threat Scanner', desc: 'Deep multi-vector URL, text & screenshot analyzer', icon: Search, badge: 'Live API' },
     { id: 'threat-intel', label: 'Threat Intelligence', desc: 'SOC time-series feeds & global attack vectors', icon: Activity },
-    { id: 'campaign-graph', label: 'Scam Campaign Graph', desc: 'Interactive topological syndicate network map', icon: Network },
-    { id: 'honeypot', label: 'Honeypot Decoys', desc: 'Live decoy sensor logs & indicator extraction', icon: Radio },
     { id: 'extension', label: 'Browser Extension', desc: 'Manifest V3 active tab cyber defense', icon: Globe },
     { id: 'whatsapp-bot', label: 'WhatsApp Bot', desc: 'Meta Cloud API webhook & live analysis in chat', icon: MessageSquare },
-    { id: 'user-protection', label: 'My Protection Vault', desc: 'Personal threat metrics & bookmarked audits', icon: UserCheck },
-    { id: 'security-center', label: 'Security Architecture', desc: 'Deterministic risk model & zero data storage', icon: Lock },
   ];
 
   const currentModule = navModules.find(m => m.id === activeTab) || navModules[0];
@@ -157,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       ScamShield Security Ecosystem
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      9 Integrated Defense Modules
+                      5 Integrated Defense Modules
                     </span>
                   </div>
 
@@ -216,12 +212,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
 
-            <button
-              onClick={() => setActiveTab('user-protection')}
-              className="text-xs text-slate-300 hover:text-white font-medium px-3 py-2 rounded-lg hover:bg-slate-800/60 transition cursor-pointer"
-            >
-              Sign In
-            </button>
             <button
               onClick={onOpenScanner}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition active:scale-95 cursor-pointer"
@@ -287,24 +277,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
-          <div className="pt-3 border-t border-slate-800 flex items-center gap-3">
-            <button
-              onClick={() => {
-                setActiveTab('user-protection');
-                setMobileMenuOpen(false);
-              }}
-              className="w-1/2 py-2 text-center text-xs text-slate-300 bg-slate-900 border border-slate-800 rounded-lg"
-            >
-              User Portal
-            </button>
+          <div className="pt-3 border-t border-slate-800">
             <button
               onClick={() => {
                 onOpenScanner();
                 setMobileMenuOpen(false);
               }}
-              className="w-1/2 py-2 text-center text-xs font-bold text-slate-950 bg-cyan-400 rounded-lg"
+              className="w-full py-2.5 text-center text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-lg transition shadow-lg shadow-cyan-500/20"
             >
-              Scan Now
+              Launch Threat Scanner ↗
             </button>
           </div>
         </div>

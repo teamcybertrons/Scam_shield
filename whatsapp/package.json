@@ -1,0 +1,17 @@
+{
+  "name": "scamshield-whatsapp-live-bot",
+  "version": "1.0.0",
+  "description": "ScamShield Live Mobile WhatsApp Bot - Intercepts Photos, Links & Text to calculate AI scam risk percentages",
+  "main": "baileys_bot.js",
+  "type": "module",
+  "scripts": {
+    "start": "node baileys_bot.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "pino": "^10.3.1",
+    "qrcode-terminal": "^0.12.0",
+    "tesseract.js": "^6.0.1",
+    "whatsapp-web.js": "^1.34.4"
+  }
+}

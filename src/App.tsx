@@ -6,26 +6,21 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { HeroSection } from './components/landing/HeroSection';
 import { TrustMetrics } from './components/landing/TrustMetrics';
-import { LiveScannerPreview } from './components/landing/LiveScannerPreview';
 import { FeatureGrid } from './components/landing/FeatureGrid';
 import { CTASection } from './components/landing/CTASection';
 import { ScannerEngine } from './components/scanner/ScannerEngine';
 import { ScanningAnimation } from './components/scanner/ScanningAnimation';
 import { AnalysisReportView } from './components/scanner/AnalysisReportView';
 import { ThreatDashboard } from './components/threat-intel/ThreatDashboard';
-import { ScamCampaignGraph } from './components/campaign-graph/ScamCampaignGraph';
-import { HoneypotDashboard } from './components/honeypot/HoneypotDashboard';
 import { ExtensionMockup } from './components/extension/ExtensionMockup';
 import { WhatsAppBotView } from './components/whatsapp/WhatsAppBotView';
-import { UserProtectionView } from './components/user-protection/UserProtectionView';
-import { SecurityCenterView } from './components/security-center/SecurityCenterView';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [currentResult, setCurrentResult] = useState<AnalysisResult>(mockCases[0]);
   const [isScanning, setIsScanning] = useState(false);
   const [scanningTarget, setScanningTarget] = useState<string>(mockCases[0].targetValue);
-  const [savedReports, setSavedReports] = useState<AnalysisResult[]>([mockCases[0]]);
+  const [, setSavedReports] = useState<AnalysisResult[]>([mockCases[0]]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -55,36 +50,45 @@ export const App: React.FC = () => {
     });
   }, []);
 
-  // Dynamic real-time scan execution via FastAPI backend
+  // Dynamic real-time scan execution via FastAPI backend with coordinated animation
   const handleExecuteScan = async (type: 'URL' | 'MESSAGE' | 'SCREENSHOT', value: string) => {
     setScanningTarget(value || 'Opportunity Input');
     setIsScanning(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    let result: AnalysisResult;
-    if (type === 'URL') {
-      result = await ScamShieldAPI.analyzeUrl(value);
-    } else if (type === 'MESSAGE') {
-      result = await ScamShieldAPI.analyzeMessage(value);
-    } else {
-      result = await ScamShieldAPI.analyzeScreenshot(value);
+    try {
+      // Run API analysis and minimum animation delay in parallel
+      const apiCallPromise = (async () => {
+        if (type === 'URL') {
+          return await ScamShieldAPI.analyzeUrl(value);
+        } else if (type === 'MESSAGE') {
+          return await ScamShieldAPI.analyzeMessage(value);
+        } else {
+          return await ScamShieldAPI.analyzeScreenshot(value);
+        }
+      })();
+
+      const minAnimationPromise = new Promise(resolve => setTimeout(resolve, 2200));
+
+      const [result] = await Promise.all([apiCallPromise, minAnimationPromise]);
+
+      if (result) {
+        setCurrentResult(result);
+        setSavedReports(prev => [result, ...prev.filter(r => r.id !== result.id)]);
+        setIsScanning(false);
+        setActiveTab('report');
+        showToast(`Security Audit Generated: ${result.id} (Score: ${result.riskScore}/100)`);
+      }
+    } catch (err) {
+      console.error('Scan execution error:', err);
+      setIsScanning(false);
+      showToast('Scan failed to complete. Please check input and retry.');
     }
-
-    setCurrentResult(result);
-    setSavedReports(prev => [result, ...prev.filter(r => r.id !== result.id)]);
-  };
-
-  const handleScanCompleted = () => {
-    setIsScanning(false);
-    setActiveTab('report');
-    showToast(`Security Audit Generated: ${currentResult.id} (Score: ${currentResult.riskScore}/100)`);
   };
 
   const handleSaveReport = (report: AnalysisResult) => {
-    if (!savedReports.some(r => r.id === report.id)) {
-      setSavedReports(prev => [report, ...prev]);
-    }
-    showToast(`Report ${report.id} bookmarked to My Protection vault.`);
+    setSavedReports(prev => [report, ...prev.filter(r => r.id !== report.id)]);
+    showToast(`Report ${report.id} saved successfully.`);
   };
 
   return (
@@ -120,11 +124,10 @@ export const App: React.FC = () => {
         {isScanning ? (
           <ScanningAnimation
             targetValue={scanningTarget}
-            onComplete={handleScanCompleted}
           />
         ) : (
           <>
-            {/* 1. Landing Page View */}
+            {/* 1. Platform Overview / Landing View */}
             {activeTab === 'home' && (
               <div className="space-y-4">
                 <HeroSection
@@ -135,15 +138,6 @@ export const App: React.FC = () => {
                   }}
                 />
                 <TrustMetrics />
-                <LiveScannerPreview
-                  onRunScan={handleExecuteScan}
-                  activeResult={currentResult}
-                  onViewFullReport={() => {
-                    setActiveTab('report');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  setActiveTab={setActiveTab}
-                />
                 <FeatureGrid setActiveTab={setActiveTab} />
                 <CTASection
                   onOpenScanner={() => {
@@ -155,7 +149,7 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            {/* 2. Interactive Scanner View */}
+            {/* 2. Interactive Threat Scanner View */}
             {activeTab === 'scanner' && (
               <ScannerEngine
                 onAnalyze={handleExecuteScan}
@@ -172,22 +166,12 @@ export const App: React.FC = () => {
               />
             )}
 
-            {/* 4. SOC Threat Intelligence View */}
+            {/* 4. Threat Intelligence View */}
             {activeTab === 'threat-intel' && (
               <ThreatDashboard />
             )}
 
-            {/* 5. Scam Campaign Intelligence Graph */}
-            {activeTab === 'campaign-graph' && (
-              <ScamCampaignGraph />
-            )}
-
-            {/* 6. Honeypot Decoy Telemetry View */}
-            {activeTab === 'honeypot' && (
-              <HoneypotDashboard />
-            )}
-
-            {/* 7. Browser Extension Showcase */}
+            {/* 5. Browser Extension Showcase */}
             {activeTab === 'extension' && (
               <ExtensionMockup
                 onOpenReport={() => {
@@ -198,35 +182,12 @@ export const App: React.FC = () => {
               />
             )}
 
-            {/* 8. WhatsApp Bot Simulation */}
+            {/* 6. WhatsApp Bot View */}
             {activeTab === 'whatsapp-bot' && (
               <WhatsAppBotView
                 onOpenReport={(res) => {
                   if (res) setCurrentResult(res);
                   setActiveTab('report');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                setActiveTab={setActiveTab}
-              />
-            )}
-
-            {/* 9. User Protection Vault & History */}
-            {activeTab === 'user-protection' && (
-              <UserProtectionView
-                onSelectReport={(report) => {
-                  setCurrentResult(report);
-                  setActiveTab('report');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                savedReports={savedReports}
-              />
-            )}
-
-            {/* 10. Security Architecture & Privacy Center */}
-            {activeTab === 'security-center' && (
-              <SecurityCenterView
-                onOpenScanner={() => {
-                  setActiveTab('scanner');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 setActiveTab={setActiveTab}

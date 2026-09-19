@@ -36,37 +36,32 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
         {/* Col 2: Platform Modules */}
         <div>
           <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200 font-mono mb-3">
-            Ecosystem Modules
+            Core Defense Modules
           </h4>
           <ul className="space-y-2 text-xs">
             <li>
+              <button onClick={() => setActiveTab('home')} className="hover:text-cyan-400 transition">
+                Platform Overview & Insights
+              </button>
+            </li>
+            <li>
               <button onClick={() => setActiveTab('scanner')} className="hover:text-cyan-400 transition">
-                Threat Scanner & Deep Analyzer
+                AI Threat Scanner & Deep Forensics
               </button>
             </li>
             <li>
               <button onClick={() => setActiveTab('threat-intel')} className="hover:text-cyan-400 transition">
-                SOC Threat Intelligence Feeds
-              </button>
-            </li>
-            <li>
-              <button onClick={() => setActiveTab('campaign-graph')} className="hover:text-cyan-400 transition">
-                Scam Campaign Cluster Graph
-              </button>
-            </li>
-            <li>
-              <button onClick={() => setActiveTab('honeypot')} className="hover:text-cyan-400 transition">
-                Defensive Honeypot Decoys
+                SOC Threat Intelligence Hub
               </button>
             </li>
             <li>
               <button onClick={() => setActiveTab('extension')} className="hover:text-cyan-400 transition">
-                Chrome & Edge Extension
+                Browser Extension Cyber Shield
               </button>
             </li>
             <li>
               <button onClick={() => setActiveTab('whatsapp-bot')} className="hover:text-cyan-400 transition">
-                WhatsApp Threat Analyst Bot
+                Native WhatsApp Threat Bot
               </button>
             </li>
           </ul>
@@ -75,29 +70,21 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab }) => {
         {/* Col 3: Principles & Architecture */}
         <div>
           <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200 font-mono mb-3">
-            Security & Trust
+            Security Guarantees
           </h4>
-          <ul className="space-y-2 text-xs">
-            <li>
-              <button onClick={() => setActiveTab('security-center')} className="hover:text-cyan-400 transition flex items-center gap-1.5">
-                <Lock className="w-3 h-3 text-cyan-400" />
-                <span>Zero Password/OTP Storage</span>
-              </button>
+          <ul className="space-y-2 text-xs text-slate-400">
+            <li className="flex items-center gap-1.5 text-cyan-300 font-medium">
+              <Lock className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+              <span>Zero Password or Credential Storage</span>
             </li>
             <li>
-              <button onClick={() => setActiveTab('security-center')} className="hover:text-cyan-400 transition">
-                Explainable Multi-Vector Scoring
-              </button>
+              <span>Deterministic Explainable Multi-Vector Scoring</span>
             </li>
             <li>
-              <button onClick={() => setActiveTab('security-center')} className="hover:text-cyan-400 transition">
-                Screenshot Redaction Pipeline
-              </button>
+              <span>Automated OCR Redaction & Privacy Shield</span>
             </li>
             <li>
-              <button onClick={() => setActiveTab('user-protection')} className="hover:text-cyan-400 transition">
-                Personal Threat Prevention Vault
-              </button>
+              <span>Real-Time WebSocket Protocol Gateway</span>
             </li>
           </ul>
         </div>

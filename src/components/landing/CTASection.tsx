@@ -43,11 +43,10 @@ export const CTASection: React.FC<CTASectionProps> = ({ onOpenScanner, setActive
             </button>
 
             <button
-              onClick={() => setActiveTab('threat-intel')}
-              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-semibold text-sm border border-slate-700/80 hover:border-cyan-500/50 transition flex items-center justify-center gap-2"
+              onClick={() => setActiveTab('whatsapp-bot')}
+              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 hover:text-white font-semibold text-sm border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-950/40"
             >
-              <Activity className="w-4 h-4 text-cyan-400" />
-              <span>Explore Threat Intelligence</span>
+              <span>💬 Test on WhatsApp Bot</span>
             </button>
           </div>
 

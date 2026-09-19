@@ -125,8 +125,11 @@ async def analyze_url(req: AnalyzeUrlRequest, db: AsyncSession = Depends(get_db)
     claimed_org = req.claimed_organization or url_data.get("targeted_brand")
     verification = CompanyVerifier.verify(url_data["hostname"], claimed_org)
     
-    # 3. AI Linguistic & Social Engineering Analysis
-    ai_data = await AIEngine.analyze_text(f"URL: {req.url} | Hostname: {url_data['hostname']} | Path: {url_data['path']}", context_type="URL")
+    # 3. AI Linguistic & Social Engineering Analysis (Inspecting both URL & Real Page Content)
+    inspection_text = f"URL: {req.url} | Hostname: {url_data['hostname']} | Path: {url_data['path']}"
+    if req.page_content and req.page_content.strip():
+        inspection_text += f"\n\nLIVE WEBPAGE CONTENT:\n{req.page_content[:3500]}"
+    ai_data = await AIEngine.analyze_text(inspection_text, context_type="URL")
     
     # Merge URL-detected evidence with AI evidence
     combined_evidence = url_data.get("signals", []) + ai_data.get("evidence", [])
@@ -307,11 +310,10 @@ async def analyze_message(req: AnalyzeMessageRequest, db: AsyncSession = Depends
     await db.refresh(analysis)
 
     return _format_analysis_response(analysis, db_report, db_signals, db_evidence)
-
 @router.post("/analyze/screenshot", response_model=AnalysisResponse)
 async def analyze_screenshot(req: AnalyzeScreenshotRequest, db: AsyncSession = Depends(get_db)):
     # If text was already extracted via OCR or provided context
-    sample_text = req.extracted_text or req.source_context or "Offer Letter Notice: Shortlisted for Tech Internship. Deposit ₹2,500 laptop insurance fee via UPI to secure position."
+    sample_text = req.extracted_text or req.source_context or "Employment offer letter submitted for cryptographic security validation."
     # Forward to message analyzer logic
     msg_req = AnalyzeMessageRequest(text=sample_text, sender_info="Screenshot OCR Ingestion")
     res = await analyze_message(msg_req, db)
