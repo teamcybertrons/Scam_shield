@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   threatOverviewMetrics, 
   timeSeriesActivityData, 
@@ -8,6 +8,7 @@ import {
 } from '../../data/threatData';
 import { ThreatIndicator, RiskLevel } from '../../types';
 import { RiskBadge } from '../common/RiskBadge';
+import { ScamShieldAPI } from '../../services/api';
 import { 
   Activity, 
   ShieldAlert, 
@@ -38,9 +39,23 @@ import {
 export const ThreatDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [indicators, setIndicators] = useState<ThreatIndicator[]>(recentThreatIndicators);
   const [selectedIndicator, setSelectedIndicator] = useState<ThreatIndicator | null>(recentThreatIndicators[0]);
+  const [isLive, setIsLive] = useState(false);
 
-  const filteredIndicators = recentThreatIndicators.filter((item) => {
+  useEffect(() => {
+    const fetchLiveThreats = async () => {
+      const data = await ScamShieldAPI.getThreats();
+      if (data && data.length > 0) {
+        setIndicators(data);
+        setSelectedIndicator(data[0]);
+        setIsLive(true);
+      }
+    };
+    fetchLiveThreats();
+  }, []);
+
+  const filteredIndicators = indicators.filter((item) => {
     const matchesSearch = item.indicator.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           item.targetedBrand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
@@ -71,7 +86,7 @@ export const ThreatDashboard: React.FC = () => {
           <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
           <span>INGESTION: 1.4K/sec</span>
           <span className="text-slate-700">|</span>
-          <span className="text-emerald-400">SOC ONLINE</span>
+          <span className="text-emerald-400 font-bold">{isLive ? 'FASTAPI DATABASE LIVE' : 'SOC ONLINE'}</span>
         </div>
       </div>
 
@@ -275,10 +290,10 @@ export const ThreatDashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <h3 className="text-base font-bold text-white font-mono">
-              ACTIVE THREAT INDICATORS STREAM
+              ACTIVE THREAT INDICATORS STREAM ({indicators.length} IOCs Indexed)
             </h3>
             <p className="text-xs text-slate-400">
-              Live indicators captured by honeypots and student community verification reports.
+              Live indicators captured by honeypots, background extensions, and student verification reports.
             </p>
           </div>
 
@@ -303,6 +318,7 @@ export const ThreatDashboard: React.FC = () => {
             >
               <option value="All">All Categories</option>
               <option value="Fake Internship">Fake Internship</option>
+              <option value="Job Offer Scam">Job Offer Scam</option>
               <option value="Crypto Phishing">Crypto Phishing</option>
               <option value="Recruiter Impersonation">Recruiter Impersonation</option>
               <option value="Data Harvest">Data Harvest</option>
@@ -341,7 +357,7 @@ export const ThreatDashboard: React.FC = () => {
                     {ind.targetedBrand}
                   </td>
                   <td className="py-3 px-3">
-                    <RiskBadge level={ind.severity} size="sm" />
+                    <RiskBadge level={ind.severity as any} size="sm" />
                   </td>
                   <td className="py-3 px-3 text-slate-400">
                     {ind.firstSeen}

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActiveTab, AnalysisResult } from './types';
 import { mockCases } from './data/mockCases';
-import { analyzeOpportunityInput } from './utils/dynamicAnalyzer';
+import { ScamShieldAPI } from './services/api';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { HeroSection } from './components/landing/HeroSection';
@@ -33,19 +33,51 @@ export const App: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Dynamic real-time scan execution
-  const handleExecuteScan = (type: 'URL' | 'MESSAGE' | 'SCREENSHOT', value: string) => {
-    const analysisResult = analyzeOpportunityInput(type, value);
-    setScanningTarget(value || analysisResult.targetValue);
+  // Check URL query parameters on initial mount (e.g., ?report=SCS-1234)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reportId = params.get('report');
+    if (reportId) {
+      ScamShieldAPI.getReport(reportId).then((rep) => {
+        if (rep) {
+          setCurrentResult(rep);
+          setActiveTab('report');
+          showToast(`Loaded Report: ${reportId}`);
+        }
+      });
+    }
+
+    // Load initial stored reports from backend
+    ScamShieldAPI.listReports().then((reps) => {
+      if (reps && reps.length > 0) {
+        setSavedReports(reps);
+      }
+    });
+  }, []);
+
+  // Dynamic real-time scan execution via FastAPI backend
+  const handleExecuteScan = async (type: 'URL' | 'MESSAGE' | 'SCREENSHOT', value: string) => {
+    setScanningTarget(value || 'Opportunity Input');
     setIsScanning(true);
-    setCurrentResult(analysisResult);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    let result: AnalysisResult;
+    if (type === 'URL') {
+      result = await ScamShieldAPI.analyzeUrl(value);
+    } else if (type === 'MESSAGE') {
+      result = await ScamShieldAPI.analyzeMessage(value);
+    } else {
+      result = await ScamShieldAPI.analyzeScreenshot(value);
+    }
+
+    setCurrentResult(result);
+    setSavedReports(prev => [result, ...prev.filter(r => r.id !== result.id)]);
   };
 
   const handleScanCompleted = () => {
     setIsScanning(false);
     setActiveTab('report');
-    showToast(`Security Audit Generated: ${currentResult.id}`);
+    showToast(`Security Audit Generated: ${currentResult.id} (Score: ${currentResult.riskScore}/100)`);
   };
 
   const handleSaveReport = (report: AnalysisResult) => {
@@ -169,7 +201,8 @@ export const App: React.FC = () => {
             {/* 8. WhatsApp Bot Simulation */}
             {activeTab === 'whatsapp-bot' && (
               <WhatsAppBotView
-                onOpenReport={() => {
+                onOpenReport={(res) => {
+                  if (res) setCurrentResult(res);
                   setActiveTab('report');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}

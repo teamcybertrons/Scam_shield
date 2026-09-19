@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "ScamShield - AI Cybersecurity Threat Detector",
+  "version": "2.0.0",
+  "description": "Real-time threat intelligence and deterministic risk analysis protecting students and job seekers against phishing & internship scams.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ScamShield Threat Inspection"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -14,8 +14,11 @@ import {
   X,
   Sparkles,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  CheckCircle,
+  Wifi
 } from 'lucide-react';
+import { ScamShieldAPI } from '../../services/api';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -31,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +43,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Check backend health periodically
+  useEffect(() => {
+    const check = async () => {
+      const health = await ScamShieldAPI.checkHealth();
+      setBackendOnline(health !== null);
+    };
+    check();
+    const interval = setInterval(check, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   // Close dropdown on outside click
@@ -60,14 +75,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     badge?: string;
   }[] = [
     { id: 'home', label: 'Platform Overview', desc: 'Main dashboard & interactive security preview', icon: Sparkles },
-    { id: 'scanner', label: 'Threat Scanner', desc: 'Deep multi-vector URL, text & screenshot analyzer', icon: Search, badge: 'Live' },
+    { id: 'scanner', label: 'Threat Scanner', desc: 'Deep multi-vector URL, text & screenshot analyzer', icon: Search, badge: 'Live API' },
     { id: 'threat-intel', label: 'Threat Intelligence', desc: 'SOC time-series feeds & global attack vectors', icon: Activity },
     { id: 'campaign-graph', label: 'Scam Campaign Graph', desc: 'Interactive topological syndicate network map', icon: Network },
     { id: 'honeypot', label: 'Honeypot Decoys', desc: 'Live decoy sensor logs & indicator extraction', icon: Radio },
-    { id: 'extension', label: 'Browser Extension', desc: 'Zero-click background browsing defense', icon: Globe },
-    { id: 'whatsapp-bot', label: 'WhatsApp Bot', desc: 'Instant AI security analyst in chat', icon: MessageSquare },
+    { id: 'extension', label: 'Browser Extension', desc: 'Manifest V3 active tab cyber defense', icon: Globe },
+    { id: 'whatsapp-bot', label: 'WhatsApp Bot', desc: 'Meta Cloud API webhook & live analysis in chat', icon: MessageSquare },
     { id: 'user-protection', label: 'My Protection Vault', desc: 'Personal threat metrics & bookmarked audits', icon: UserCheck },
-    { id: 'security-center', label: 'Security & Privacy', desc: 'Explainable risk model & zero data storage', icon: Lock },
+    { id: 'security-center', label: 'Security Architecture', desc: 'Deterministic risk model & zero data storage', icon: Lock },
   ];
 
   const currentModule = navModules.find(m => m.id === activeTab) || navModules[0];
@@ -83,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Brand Logo (Without Version Number) */}
+          {/* Brand Logo */}
           <div 
             onClick={() => setActiveTab('home')}
             className="flex items-center gap-3 cursor-pointer group select-none"
@@ -191,8 +206,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           </div>
 
-          {/* Right Action CTAs */}
+          {/* Right Action CTAs & Backend Connection Status */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Backend Health Badge */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono">
+              <span className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              <span className={backendOnline ? 'text-emerald-300' : 'text-amber-300'}>
+                {backendOnline ? 'FastAPI Online' : 'Connecting Engine...'}
+              </span>
+            </div>
+
             <button
               onClick={() => setActiveTab('user-protection')}
               className="text-xs text-slate-300 hover:text-white font-medium px-3 py-2 rounded-lg hover:bg-slate-800/60 transition cursor-pointer"
@@ -204,7 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition active:scale-95 cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Analyze Opportunity</span>
+              <span>Threat Scanner</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </div>

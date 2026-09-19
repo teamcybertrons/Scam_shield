@@ -1,0 +1,251 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 340px;
+  background-color: #030712;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #0b0f19;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shield-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #06b6d4;
+  box-shadow: 0 0 10px #06b6d4;
+}
+
+.logo-title {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  font-size: 13px;
+}
+
+.version-tag {
+  font-size: 10px;
+  font-family: monospace;
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.main-content {
+  padding: 14px 16px;
+  min-height: 220px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  gap: 12px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(6, 182, 212, 0.2);
+  border-top-color: #06b6d4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.url-display {
+  font-family: monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
+  margin-bottom: 12px;
+}
+
+.score-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  margin-bottom: 12px;
+}
+
+.score-number {
+  font-size: 32px;
+  font-weight: 900;
+  font-family: monospace;
+}
+
+.score-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-level {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+}
+
+.confidence-tag {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.brand-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  font-size: 11px;
+  margin-bottom: 12px;
+  border: 1px solid #1e293b;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.evidence-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #1e293b;
+  border-left: 3px solid #ef4444;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.evidence-chip.warning {
+  border-left-color: #f97316;
+}
+
+.evidence-chip.clean {
+  border-left-color: #10b981;
+}
+
+.open-report-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+  color: white;
+  border: none;
+  padding: 9px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.open-report-btn:hover {
+  opacity: 0.9;
+}
+
+.error-state {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.error-title {
+  color: #ef4444;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.error-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.retry-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #020617;
+  border-top: 1px solid #0f172a;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.status-live {
+  color: #10b981;
+}
+
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScamShield Threat Intelligence Schemas",
+  "definitions": {
+    "RiskLevel": {
+      "type": "string",
+      "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"]
+    },
+    "EvidenceItem": {
+      "type": "object",
+      "required": ["id", "category", "title", "severity", "confidence", "description", "evidenceSource", "recommendation"],
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string", "enum": ["payment", "domain", "identity", "content", "urgency", "technical"] },
+        "title": { "type": "string" },
+        "severity": { "$ref": "#/definitions/RiskLevel" },
+        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "description": { "type": "string" },
+        "detectedQuote": { "type": "string" },
+        "evidenceSource": { "type": "string" },
+        "recommendation": { "type": "string" }
+      }
+    },
+    "RiskBreakdown": {
+      "type": "object",
+      "required": ["domainRisk", "paymentRisk", "identityRisk", "contentRisk", "reputationRisk"],
+      "properties": {
+        "domainRisk": { "$ref": "#/definitions/RiskCategory" },
+        "paymentRisk": { "$ref": "#/definitions/RiskCategory" },
+        "identityRisk": { "$ref": "#/definitions/RiskCategory" },
+        "contentRisk": { "$ref": "#/definitions/RiskCategory" },
+        "reputationRisk": { "$ref": "#/definitions/RiskCategory" }
+      }
+    },
+    "RiskCategory": {
+      "type": "object",
+      "required": ["score", "max", "label", "desc"],
+      "properties": {
+        "score": { "type": "integer" },
+        "max": { "type": "integer" },
+        "label": { "type": "string" },
+        "desc": { "type": "string" }
+      }
+    },
+    "AnalysisReport": {
+      "type": "object",
+      "required": ["id", "title", "targetType", "targetValue", "analyzedAt", "riskScore", "riskLevel", "confidence", "summary", "breakdown", "evidenceList"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["URL", "MESSAGE", "SCREENSHOT"] },
+        "targetValue": { "type": "string" },
+        "analyzedAt": { "type": "string" },
+        "riskScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "riskLevel": { "$ref": "#/definitions/RiskLevel" },
+        "confidence": { "type": "integer" },
+        "summary": { "type": "string" },
+        "breakdown": { "$ref": "#/definitions/RiskBreakdown" },
+        "evidenceList": { "type": "array", "items": { "$ref": "#/definitions/EvidenceItem" } }
+      }
+    }
+  }
+}

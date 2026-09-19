@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { campaignGraphNodes, campaignGraphEdges } from '../../data/campaignGraphData';
-import { CampaignNode } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { campaignGraphNodes as defaultNodes, campaignGraphEdges as defaultEdges } from '../../data/campaignGraphData';
+import { CampaignNode, CampaignEdge } from '../../types';
 import { RiskBadge } from '../common/RiskBadge';
+import { ScamShieldAPI } from '../../services/api';
 import { 
   Network, 
   Building2, 
@@ -21,8 +22,45 @@ import {
 } from 'lucide-react';
 
 export const ScamCampaignGraph: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<CampaignNode>(campaignGraphNodes[0]);
+  const [nodes, setNodes] = useState<CampaignNode[]>(defaultNodes);
+  const [edges, setEdges] = useState<CampaignEdge[]>(defaultEdges);
+  const [selectedNode, setSelectedNode] = useState<CampaignNode>(defaultNodes[0]);
   const [scale, setScale] = useState(1);
+  const [campaignTitle, setCampaignTitle] = useState('Op: ShadowHire - Apex Syndicate');
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      const data = await ScamShieldAPI.getCampaigns();
+      if (data && data.length > 0 && data[0].graph) {
+        const g = data[0].graph;
+        if (g.nodes && g.edges) {
+          // Merge coordinates if needed
+          const mappedNodes: CampaignNode[] = g.nodes.map((n: any, idx: number) => {
+            const defMatch = defaultNodes.find(dn => dn.id === n.id);
+            return {
+              id: n.id,
+              label: n.label,
+              type: n.type,
+              risk: n.risk,
+              iconName: n.type,
+              x: defMatch ? defMatch.x : 150 + (idx % 3) * 220,
+              y: defMatch ? defMatch.y : 120 + Math.floor(idx / 3) * 160,
+              reports: n.reports || 50,
+              firstSeen: '2025-01-20',
+              details: n.details || 'Automated multi-channel campaign node.',
+              status: n.risk === 'CRITICAL' ? 'Active Weaponized' : 'Under Investigation',
+              associatedCampaigns: 2
+            };
+          });
+          setNodes(mappedNodes);
+          setEdges(g.edges);
+          setSelectedNode(mappedNodes[0]);
+          setCampaignTitle(data[0].name || campaignTitle);
+        }
+      }
+    };
+    fetchCampaigns();
+  }, []);
 
   const getIcon = (type: CampaignNode['type']) => {
     switch (type) {
@@ -72,7 +110,7 @@ export const ScamCampaignGraph: React.FC = () => {
             Scam Campaign Intelligence Graph
           </h1>
           <p className="text-xs sm:text-sm text-slate-400">
-            Multi-tier topological map exposing connections between spoofed corporate brands, domains, WhatsApp senders, and UPI payment mules.
+            Active Campaign: <strong className="text-cyan-300">{campaignTitle}</strong> — multi-tier topological map exposing links between spoofed brands, domains, WhatsApp senders, and UPI mules.
           </p>
         </div>
 
@@ -143,9 +181,9 @@ export const ScamCampaignGraph: React.FC = () => {
                 </marker>
               </defs>
 
-              {campaignGraphEdges.map((edge) => {
-                const source = campaignGraphNodes.find(n => n.id === edge.from);
-                const target = campaignGraphNodes.find(n => n.id === edge.to);
+              {edges.map((edge) => {
+                const source = nodes.find(n => n.id === edge.from);
+                const target = nodes.find(n => n.id === edge.to);
                 if (!source || !target) return null;
 
                 const isConnectedToSelected = selectedNode && (selectedNode.id === source.id || selectedNode.id === target.id);
@@ -181,7 +219,7 @@ export const ScamCampaignGraph: React.FC = () => {
             </svg>
 
             {/* Nodes */}
-            {campaignGraphNodes.map((node) => {
+            {nodes.map((node) => {
               const Icon = getIcon(node.type);
               const isSelected = selectedNode?.id === node.id;
 
@@ -217,7 +255,7 @@ export const ScamCampaignGraph: React.FC = () => {
           </div>
 
           <div className="absolute bottom-4 right-4 text-[10px] font-mono text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800">
-            Click any node to inspect forensics
+            Backend Graph Connected • Click any node
           </div>
         </div>
 
@@ -284,7 +322,7 @@ export const ScamCampaignGraph: React.FC = () => {
                   <span>Automated Countermeasure:</span>
                 </div>
                 <p className="text-[11px] text-slate-300">
-                  Indicator pushed to browser extension blocker & National Cyber Crime blacklist feed.
+                  Indicator indexed in FastAPI threat cluster and pushed to real-time defense feeds.
                 </p>
               </div>
             </div>

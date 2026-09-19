@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ScamShield Security Inspector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo-box">
+      <div class="shield-dot"></div>
+      <span class="logo-title">SCAMSHIELD</span>
+    </div>
+    <span class="version-tag">v2.0 LIVE</span>
+  </div>
+
+  <div class="main-content" id="content">
+    <div class="loading-state" id="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Analyzing endpoint forensics...</p>
+    </div>
+
+    <div class="result-box hidden" id="result">
+      <div class="url-display" id="targetUrl">https://example.com</div>
+      
+      <div class="score-card" id="scoreCard">
+        <div class="score-number" id="riskScore">--</div>
+        <div class="score-details">
+          <div class="score-level" id="riskLevel">ANALYZING</div>
+          <div class="confidence-tag" id="confidence">95% Confidence</div>
+        </div>
+      </div>
+
+      <div class="brand-status" id="brandStatus">
+        <span class="status-indicator" id="statusDot"></span>
+        <span id="brandText">Verified Official Domain</span>
+      </div>
+
+      <div class="evidence-section">
+        <div class="section-title">DETECTION EVIDENCE</div>
+        <div class="evidence-list" id="evidenceList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <button class="open-report-btn" id="openReportBtn">
+        Open Full Security Report ↗
+      </button>
+    </div>
+
+    <div class="error-state hidden" id="errorBox">
+      <div class="error-title">Backend Disconnected</div>
+      <p class="error-desc">Could not reach ScamShield API on localhost:8000.</p>
+      <button class="retry-btn" id="retryBtn">Retry Inspection</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Deterministic Risk Engine</span>
+    <span class="status-live">● SOC Active</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
