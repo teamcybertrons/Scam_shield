@@ -300,62 +300,12 @@ export const Hero3DHologram: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[420px] sm:h-[480px] flex items-center justify-center">
-      {/* 3D Canvas */}
+    <div className="relative w-full h-[450px] sm:h-[520px] flex items-center justify-center">
+      {/* 3D Holographic Canvas */}
       <canvas
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="w-full h-full cursor-grab active:cursor-grabbing pointer-events-auto"
       />
-
-      {/* Floating 3D HUD Badge: Live Threat Neutralization */}
-      <div 
-        className="absolute top-4 right-4 sm:right-8 bg-slate-900/85 border border-cyan-500/40 rounded-xl p-3 backdrop-blur-xl shadow-xl shadow-cyan-500/10 pointer-events-none transform hover:scale-105 transition-transform"
-        style={{ transformStyle: 'preserve-3d', transform: 'translateZ(30px)' }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-[10px] font-mono font-bold text-emerald-300 uppercase">
-            AI Threat Engine
-          </span>
-        </div>
-        <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
-          <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Active Defense Grid</span>
-        </div>
-      </div>
-
-      {/* Floating 3D HUD Badge: Latency Vector */}
-      <div 
-        className="absolute bottom-6 left-4 sm:left-8 bg-slate-900/85 border border-indigo-500/40 rounded-xl p-3 backdrop-blur-xl shadow-xl shadow-indigo-500/10 pointer-events-none transform hover:scale-105 transition-transform"
-        style={{ transformStyle: 'preserve-3d', transform: 'translateZ(25px)' }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <Zap className="w-3 h-3 text-cyan-400" />
-          <span className="text-[10px] font-mono text-slate-300">
-            Engine Latency
-          </span>
-        </div>
-        <div className="text-xs font-extrabold text-cyan-300 font-mono flex items-center gap-1">
-          <span>&lt; 14ms</span>
-          <span className="text-[9px] text-slate-400 font-normal">Realtime</span>
-        </div>
-      </div>
-
-      {/* Floating 3D Core Badge */}
-      <div 
-        className="absolute bottom-6 right-6 sm:right-12 bg-slate-900/85 border border-purple-500/40 rounded-xl p-3 backdrop-blur-xl shadow-xl shadow-purple-500/10 pointer-events-none transform hover:scale-105 transition-transform"
-        style={{ transformStyle: 'preserve-3d', transform: 'translateZ(35px)' }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <Cpu className="w-3 h-3 text-purple-400" />
-          <span className="text-[10px] font-mono text-purple-300">
-            Multi-Vector NLP
-          </span>
-        </div>
-        <div className="text-xs font-bold text-white font-mono">
-          WHOIS + OCR + UPI
-        </div>
-      </div>
     </div>
   );
 };

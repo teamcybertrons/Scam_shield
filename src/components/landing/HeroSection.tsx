@@ -105,46 +105,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
 
           </div>
 
-          {/* Right Column: 3D Hologram Orb with Interactive Tilt Depth */}
-          <div className="lg:col-span-5 flex justify-center">
-            <Card3DTilt maxTilt={14} scale={1.03} className="w-full max-w-lg">
-              <div className="relative rounded-3xl bg-gradient-to-b from-slate-900/80 via-[#070d1c]/90 to-[#030611] border border-cyan-500/30 p-2 sm:p-4 shadow-2xl backdrop-blur-2xl overflow-hidden group">
-                
-                {/* Cyber Corner HUD Accents */}
-                <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-cyan-400 pointer-events-none" />
-                <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-cyan-400 pointer-events-none" />
-                <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-cyan-400 pointer-events-none" />
-                <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-cyan-400 pointer-events-none" />
-
-                {/* Top Terminal Status Header */}
-                <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-slate-950/60 rounded-t-2xl font-mono text-[11px] text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-white font-semibold">NEURAL DEFENSE GRID</span>
-                  </div>
-                  <span className="text-cyan-400 font-bold">LIVE TELEMETRY</span>
-                </div>
-
-                {/* Interactive 3D Holographic Sphere */}
-                <Hero3DHologram />
-
-                {/* Bottom Interactive Quick Scan Prompt */}
-                <div className="mt-2 p-3 bg-slate-950/80 rounded-2xl border border-cyan-500/20 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
-                    <Sparkles className="w-4 h-4 text-cyan-400 animate-spin-slow" />
-                    <span>Cross-Campus Threat Radar: Active</span>
-                  </div>
-                  <button
-                    onClick={onOpenScanner}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Scan</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-              </div>
-            </Card3DTilt>
+          {/* Right Column: Pure Floating 3D Hologram Orb */}
+          <div className="lg:col-span-5 flex justify-center items-center relative">
+            <Hero3DHologram />
           </div>
 
         </div>
