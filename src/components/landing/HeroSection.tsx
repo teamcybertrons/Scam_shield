@@ -48,9 +48,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenSc
 
             {/* Main Punchy Typography */}
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.06]">
-              Before You Apply. <br />
+              Trust the Opportunity. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 drop-shadow-sm">
-                Know What You&apos;re Trusting.
+                Verify the Source.
               </span>
             </h1>
 
