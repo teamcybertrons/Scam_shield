@@ -150,7 +150,7 @@ export const ThreatDashboard: React.FC = () => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-8">
       
       {/* Title & Live Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">

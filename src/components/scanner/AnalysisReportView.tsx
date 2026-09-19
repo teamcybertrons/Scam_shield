@@ -77,7 +77,7 @@ export const AnalysisReportView: React.FC<AnalysisReportViewProps> = ({
   const { breakdown, verification } = result;
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="max-w-6xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-8">
       
       {/* Top Breadcrumb & Action Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">

@@ -98,7 +98,7 @@ export const WhatsAppBotView: React.FC<WhatsAppBotViewProps> = ({ onOpenReport }
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-10">
       
       {/* Zoom Modal */}
       {isZoomed && (

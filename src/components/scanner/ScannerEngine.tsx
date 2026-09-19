@@ -98,7 +98,7 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 space-y-8">
+    <div className="max-w-4xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 space-y-8">
       
       {/* Engine Title Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">

@@ -318,7 +318,7 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-10">
       
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
