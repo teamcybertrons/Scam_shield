@@ -22,7 +22,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ setActiveTab, onOpenScanner }) => {
   return (
-    <section className="relative pt-8 pb-14 md:pt-14 md:pb-20 overflow-hidden">
+    <section className="relative pt-16 pb-14 md:pt-24 md:pb-20 overflow-hidden">
       
       {/* Dynamic 3D Ambient Glowing Auroras */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/10 blur-[150px] rounded-full pointer-events-none animate-pulse-slow" />
