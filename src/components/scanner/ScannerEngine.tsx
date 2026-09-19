@@ -8,14 +8,7 @@ import {
   ShieldCheck,
   Lock,
   Zap,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Sparkles,
-  FileText,
-  Trash2,
-  Flame,
-  Check
+  AlertTriangle
 } from 'lucide-react';
 import { Card3DTilt } from '../common/Card3DTilt';
 
@@ -35,24 +28,6 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [uploadedFileSize, setUploadedFileSize] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-
-  // Quick Preset Handlers
-  const applyPreset = (preset: 'FAKE_OFFER' | 'FAKE_URL' | 'GENUINE_OFFER') => {
-    if (preset === 'FAKE_OFFER') {
-      setActiveTab('MESSAGE');
-      setMessage(
-        'IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER\nCompany: Infosys Recruitment Desk\nStipend: ₹60,000/Month\nLocation: Remote / Bengaluru\n\nMANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (100% REFUNDABLE).\nUPI ID: infosys.security.deposit@oksbi\nOffer expires in 24 HOURS!\nContact: recruitment.infosys.hr@gmail.com | Telegram: @infosys_onboarding_desk'
-      );
-    } else if (preset === 'FAKE_URL') {
-      setActiveTab('URL');
-      setUrl('https://infosys-careers-portal.top/internship-apply/registration-fee');
-    } else if (preset === 'GENUINE_OFFER') {
-      setActiveTab('MESSAGE');
-      setMessage(
-        'NovaTech Solutions - Software Engineering Internship Offer\nDear Aravind Kumar,\nWe are pleased to extend an offer for the position of Software Engineer Intern at NovaTech Solutions. Monthly Stipend: ₹45,000. Project Bonus: ₹20,000. Location: Bengaluru. Terms: Standard enterprise confidentiality. No security deposit or processing fees are ever requested.\nAuthorized Signatory: Maya Patil, Head of Human Resources.'
-      );
-    }
-  };
 
   const processFile = (file: File) => {
     setUploadedFileName(file.name);
@@ -137,39 +112,10 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
         <p className="text-sm text-slate-300 leading-relaxed font-sans">
           Submit any application link, recruiter email, or offer screenshot to execute deterministic scoring and AI linguistic analysis against live threat intelligence.
         </p>
-
-        {/* Quick Test Preset Buttons */}
-        <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-[11px] font-mono text-slate-400">Quick Test:</span>
-          <button
-            type="button"
-            onClick={() => applyPreset('FAKE_OFFER')}
-            className="px-2.5 py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 text-xs font-mono transition cursor-pointer flex items-center gap-1"
-          >
-            <Flame className="w-3 h-3 text-rose-400" />
-            <span>Fake ₹2,499 Deposit Offer</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('FAKE_URL')}
-            className="px-2.5 py-1 rounded-lg bg-amber-950/40 hover:bg-amber-900/60 border border-amber-500/40 text-amber-300 text-xs font-mono transition cursor-pointer flex items-center gap-1"
-          >
-            <Globe className="w-3 h-3 text-amber-400" />
-            <span>Phishing .top Link</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('GENUINE_OFFER')}
-            className="px-2.5 py-1 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-mono transition cursor-pointer flex items-center gap-1"
-          >
-            <Check className="w-3 h-3 text-emerald-400" />
-            <span>Genuine Corporate Offer</span>
-          </button>
-        </div>
       </div>
 
-      {/* Main 3D Tilt Analyzer Card */}
-      <Card3DTilt maxTilt={6} scale={1.01}>
+      {/* Main Analyzer Card */}
+      <Card3DTilt>
         <div className="rounded-3xl bg-gradient-to-b from-slate-900/95 via-[#0a1122]/95 to-[#050913] border border-cyan-500/30 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-6 relative overflow-hidden">
           
           {/* Cyber Corner HUD Accents */}
