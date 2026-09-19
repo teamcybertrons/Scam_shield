@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   Globe, 
   ShieldAlert, 
-  Check, 
   ArrowRight, 
   ShieldCheck, 
   Download, 
@@ -10,12 +9,9 @@ import {
   CheckCircle2, 
   RefreshCw, 
   Layers, 
-  Maximize2,
-  Sparkles,
-  Zap,
-  Smartphone,
-  Eye,
-  CheckCircle
+  Zap, 
+  Eye, 
+  CheckCircle 
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { ActiveTab, AnalysisResult } from '../../types';
@@ -26,7 +22,7 @@ interface ExtensionMockupProps {
   setActiveTab: (tab: ActiveTab) => void;
 }
 
-export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, setActiveTab }) => {
+export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport }) => {
   const [selectedBrowser, setSelectedBrowser] = useState<'chrome' | 'edge' | 'brave'>('chrome');
   const [copiedPath, setCopiedPath] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -38,325 +34,34 @@ export const ExtensionMockup: React.FC<ExtensionMockupProps> = ({ onOpenReport, 
     setTimeout(() => setCopiedPath(false), 3000);
   };
 
-  // Generate & Download the actual Manifest V3 zip package
+  // Generate & Download the actual Manifest V3 zip package from live files
   const handleDownloadZip = async () => {
     setIsDownloading(true);
     try {
       const zip = new JSZip();
+      const files = [
+        'manifest.json',
+        'popup.html',
+        'popup.css',
+        'popup.js',
+        'background.js',
+        'content.js'
+      ];
 
-      // Extension Manifest V3
-      zip.file('manifest.json', JSON.stringify({
-        manifest_version: 3,
-        name: "ScamShield - AI Cybersecurity Threat Detector",
-        version: "2.0.0",
-        description: "Real-time threat intelligence and deterministic risk analysis protecting students and job seekers against phishing & internship scams.",
-        permissions: ["activeTab", "storage", "tabs", "scripting"],
-        host_permissions: [
-          "<all_urls>",
-          "http://localhost:8000/*",
-          "http://127.0.0.1:8000/*"
-        ],
-        action: {
-          default_popup: "popup.html",
-          default_title: "ScamShield Threat Inspection"
-        },
-        background: {
-          service_worker: "background.js"
-        },
-        content_scripts: [
-          {
-            matches: ["<all_urls>"],
-            js: ["content.js"],
-            run_at: "document_idle"
+      await Promise.all(
+        files.map(async (filename) => {
+          try {
+            const res = await fetch(`/extension/${filename}`);
+            if (res.ok) {
+              const text = await res.text();
+              zip.file(filename, text);
+            }
+          } catch (e) {
+            console.warn(`Could not fetch /extension/${filename}`, e);
           }
-        ]
-      }, null, 2));
+        })
+      );
 
-      // Background Service Worker
-      zip.file('background.js', `// ScamShield Background Service Worker
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("ScamShield Extension v2.0 Installed Successfully");
-});
-`);
-
-      // Content Script
-      zip.file('content.js', `// ScamShield Content Script for Active DOM & Screen Inspection
-(() => {
-  function extractScreenText() {
-    let textPieces = [];
-    const currentUrl = window.location.href;
-    const currentHost = window.location.hostname;
-    const title = document.title || "";
-    textPieces.push(title);
-
-    const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute('content') || "";
-    if (metaDesc) textPieces.push(metaDesc);
-
-    document.querySelectorAll('img, [role="img"], [data-testid*="caption"], [aria-label], [title], a[download]').forEach(el => {
-      const alt = el.getAttribute('alt') || '';
-      const aria = el.getAttribute('aria-label') || '';
-      const titleAttr = el.getAttribute('title') || '';
-      const downloadAttr = el.getAttribute('download') || '';
-      const srcAttr = el.getAttribute('src') || '';
-      if (alt && alt.length > 2) textPieces.push(alt);
-      if (aria && aria.length > 2) textPieces.push(aria);
-      if (titleAttr && titleAttr.length > 2) textPieces.push(titleAttr);
-      if (downloadAttr && downloadAttr.length > 2) textPieces.push(downloadAttr);
-      if (srcAttr && srcAttr.length > 5 && !srcAttr.startsWith('data:') && !srcAttr.startsWith('blob:')) {
-        textPieces.push(srcAttr);
-      }
-    });
-
-    if (document.body) {
-      const bodyText = document.body.innerText || "";
-      textPieces.push(bodyText);
-    }
-
-    let combined = textPieces.join(" ").replace(/\\s+/g, " ").trim();
-
-    return {
-      url: currentUrl,
-      host: currentHost,
-      title: title,
-      metaDescription: metaDesc,
-      pageText: combined.slice(0, 8000),
-      textLength: combined.length
-    };
-  }
-
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "SCAN_SCREEN" || request.action === "GET_DOM_TELEMETRY" || request.action === "GET_PAGE_CONTENT") {
-      sendResponse(extractScreenText());
-      return true;
-    }
-  });
-})();`);
-
-      // Popup HTML
-      zip.file('popup.html', `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>ScamShield AI Security Inspector</title>
-  <link rel="stylesheet" href="popup.css">
-</head>
-<body>
-  <div class="popup-container">
-    <header class="header">
-      <div class="logo-box">
-        <div class="shield-dot"></div>
-        <span class="logo-title">SCAMSHIELD</span>
-      </div>
-      <span class="version-tag">AI LIVE</span>
-    </header>
-
-    <main class="main-content" id="content">
-      <div class="hero-action-box">
-        <button id="scanScreenBtn" class="scan-screen-btn" type="button">
-          <span class="btn-icon">⚡</span>
-          <span class="btn-label">
-            <strong>Scan Current Screen</strong>
-            <small>Extract page text & detect risks with AI</small>
-          </span>
-        </button>
-      </div>
-
-      <div class="quick-scan-bar">
-        <input type="text" id="customUrlInput" placeholder="Or paste link / offer text to verify..." />
-        <button id="scanCustomBtn" type="button">Scan</button>
-      </div>
-
-      <div class="idle-state" id="idleCard">
-        <div class="idle-icon">🛡️</div>
-        <div class="idle-title">Ready for Screen Scan</div>
-        <p class="idle-desc">Click the button above to inspect visible page text with AI.</p>
-        <div class="idle-features">
-          <span class="idle-chip">✓ Upfront Fee Extraction</span>
-          <span class="idle-chip">✓ Brand & Domain Match</span>
-          <span class="idle-chip">✓ Telegram/Chat Traps</span>
-        </div>
-      </div>
-
-      <div class="loading-state hidden" id="loading">
-        <div class="loader">
-          <svg id="pegtopone" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
-            <defs>
-              <filter id="shine1"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
-              <mask id="mask1"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
-              <radialGradient id="gradient-1-1" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.3"></stop><stop offset="50%" stop-color="black" stop-opacity="0.1"></stop><stop offset="100%" stop-color="black" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-2-1" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity="0.3"></stop><stop offset="50%" stop-color="white" stop-opacity="0.1"></stop><stop offset="100%" stop-color="white" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-3-1" cx="85" cy="50" fx="85" fy="50" xlink:href="#gradient-2-1"></radialGradient>
-              <radialGradient id="gradient-4-1" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlink:href="#gradient-3-1"></radialGradient>
-              <linearGradient id="gradient-5-1" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.2"></stop><stop offset="40%" stop-color="black" stop-opacity="0"></stop></linearGradient>
-            </defs>
-            <g>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-1)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" stroke-width="3" filter="url(#shine1)" mask="url(#mask1)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-1)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-1)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-1)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-1)"></path>
-            </g>
-          </svg>
-          <svg id="pegtoptwo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
-            <defs>
-              <filter id="shine2"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
-              <mask id="mask2"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
-              <radialGradient id="gradient-1-2" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.3"></stop><stop offset="50%" stop-color="black" stop-opacity="0.1"></stop><stop offset="100%" stop-color="black" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-2-2" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity="0.3"></stop><stop offset="50%" stop-color="white" stop-opacity="0.1"></stop><stop offset="100%" stop-color="white" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-3-2" cx="85" cy="50" fx="85" fy="50" xlink:href="#gradient-2-2"></radialGradient>
-              <radialGradient id="gradient-4-2" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlink:href="#gradient-3-2"></radialGradient>
-              <linearGradient id="gradient-5-2" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.2"></stop><stop offset="40%" stop-color="black" stop-opacity="0"></stop></linearGradient>
-            </defs>
-            <g>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-2)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" stroke-width="3" filter="url(#shine2)" mask="url(#mask2)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-2)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-2)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-2)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-2)"></path>
-            </g>
-          </svg>
-          <svg id="pegtopthree" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
-            <defs>
-              <filter id="shine3"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
-              <mask id="mask3"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
-              <radialGradient id="gradient-1-3" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.3"></stop><stop offset="50%" stop-color="black" stop-opacity="0.1"></stop><stop offset="100%" stop-color="black" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-2-3" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity="0.3"></stop><stop offset="50%" stop-color="white" stop-opacity="0.1"></stop><stop offset="100%" stop-color="white" stop-opacity="0"></stop></radialGradient>
-              <radialGradient id="gradient-3-3" cx="85" cy="50" fx="85" fy="50" xlink:href="#gradient-2-3"></radialGradient>
-              <radialGradient id="gradient-4-3" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlink:href="#gradient-3-3"></radialGradient>
-              <linearGradient id="gradient-5-3" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="black" stop-opacity="0.2"></stop><stop offset="40%" stop-color="black" stop-opacity="0"></stop></linearGradient>
-            </defs>
-            <g>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-3)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" stroke-width="3" filter="url(#shine3)" mask="url(#mask3)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-3)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-3)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-3)"></path>
-              <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-3)"></path>
-            </g>
-          </svg>
-        </div>
-        <p class="loading-text" id="loadingText">Extracting on-screen text...</p>
-        <div class="loading-sub" id="loadingSub">Running AI linguistic analysis</div>
-      </div>
-
-      <div class="result-box hidden" id="result">
-        <div class="screen-meta-badge" id="screenMetaBadge">
-          <span class="meta-icon">🖥️</span>
-          <span class="meta-text" id="targetUrl">https://example.com</span>
-        </div>
-        
-        <div class="score-card" id="scoreCard">
-          <div class="score-number" id="riskScore">--</div>
-          <div class="score-details">
-            <div class="score-level" id="riskLevel">ANALYZING</div>
-            <div class="confidence-tag" id="confidence">98% AI Confidence</div>
-          </div>
-        </div>
-
-        <div class="brand-status" id="brandStatus">
-          <span class="status-indicator" id="statusDot"></span>
-          <span id="brandText">Verified Official Domain</span>
-        </div>
-
-        <div class="summary-box" id="summaryText">
-          AI linguistic and endpoint forensic analysis completed.
-        </div>
-
-        <div class="evidence-section">
-          <div class="section-title">AI DETECTION EVIDENCE</div>
-          <div class="evidence-list" id="evidenceList"></div>
-        </div>
-
-        <div class="actions-group">
-          <button class="open-report-btn" id="openReportBtn" type="button">Open Full Security Report ↗</button>
-        </div>
-      </div>
-
-      <div class="error-state hidden" id="errorBox">
-        <div class="error-title">Inspection Issue</div>
-        <p class="error-desc" id="errorDesc">Could not analyze current screen.</p>
-        <button class="retry-btn" id="retryBtn" type="button">Retry Screen Scan</button>
-      </div>
-    </main>
-
-    <footer class="footer">
-      <span>AI Risk Engine</span>
-      <span class="status-live">● SOC Active</span>
-    </footer>
-  </div>
-
-  <script src="popup.js"></script>
-</body>
-</html>`);
-
-      // Popup CSS
-      zip.file('popup.css', `* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; padding: 0; background-color: #030712; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; display: block; }
-.popup-container { width: 350px; display: flex; flex-direction: column; background-color: #030712; overflow: hidden; }
-.header { width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 16px; background: #0b0f19; border-bottom: 1px solid rgba(6, 182, 212, 0.25); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); }
-.logo-box { display: flex; flex-direction: row; align-items: center; gap: 8px; }
-.shield-dot { width: 8px; height: 8px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 10px #06b6d4; flex-shrink: 0; }
-.logo-title { font-weight: 800; letter-spacing: 0.08em; color: #38bdf8; font-size: 13px; line-height: 1; }
-.version-tag { font-size: 10px; font-family: monospace; background: rgba(6, 182, 212, 0.15); color: #22d3ee; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(6, 182, 212, 0.3); line-height: 1.2; }
-.main-content { width: 100%; display: flex; flex-direction: column; padding: 12px 14px; background-color: #030712; }
-.hero-action-box { width: 100%; margin-bottom: 10px; }
-.scan-screen-btn { width: 100%; display: flex; flex-direction: row; align-items: center; gap: 12px; background: linear-gradient(135deg, #06b6d4 0%, #0284c7 50%, #2563eb 100%); border: 1.5px solid #38bdf8; border-radius: 10px; padding: 10px 14px; color: #ffffff; cursor: pointer; box-shadow: 0 4px 16px rgba(6, 182, 212, 0.35); transition: all 0.2s; text-align: left; }
-.scan-screen-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.55); border-color: #67e8f9; }
-.btn-icon { font-size: 20px; background: rgba(255, 255, 255, 0.22); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; box-shadow: 0 0 8px rgba(255, 255, 255, 0.25); }
-.btn-label { display: flex; flex-direction: column; }
-.btn-label strong { font-size: 13px; font-weight: 800; color: #ffffff; }
-.btn-label small { font-size: 10px; color: #e0f2fe; opacity: 0.95; }
-.quick-scan-bar { width: 100%; display: flex; flex-direction: row; gap: 6px; margin-bottom: 10px; }
-.quick-scan-bar input { flex: 1; background: #0b1120; border: 1px solid #1e293b; color: #f8fafc; font-size: 11px; padding: 7px 10px; border-radius: 6px; outline: none; }
-.quick-scan-bar button { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 6px; font-weight: 700; font-size: 11px; padding: 7px 12px; cursor: pointer; }
-.quick-scan-bar button:hover { background: #06b6d4; color: #020617; }
-.idle-state { width: 100%; text-align: center; padding: 20px 14px; background: rgba(15, 23, 42, 0.75); border: 1px dashed rgba(56, 189, 248, 0.25); border-radius: 10px; margin-bottom: 6px; }
-.idle-icon { font-size: 26px; margin-bottom: 6px; }
-.idle-title { font-size: 13px; font-weight: 800; color: #f1f5f9; margin-bottom: 4px; }
-.idle-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; margin-bottom: 10px; }
-.idle-features { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-.idle-chip { font-size: 10px; font-family: monospace; color: #38bdf8; background: rgba(6, 182, 212, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(6, 182, 212, 0.2); }
-.loading-state { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; gap: 6px; }
-.loader { --fill-color: #06b6d4; --shine-color: rgba(6, 182, 212, 0.35); transform: scale(0.65); width: 100px; height: 80px; position: relative; filter: drop-shadow(0 0 14px var(--shine-color)); margin: 8px auto 4px auto; }
-.loader #pegtopone { position: absolute; animation: flowe-one 1s linear infinite; }
-.loader #pegtoptwo { position: absolute; opacity: 0; transform: scale(0) translateY(-200px) translateX(-100px); animation: flowe-two 1s linear infinite; animation-delay: 0.3s; }
-.loader #pegtopthree { position: absolute; opacity: 0; transform: scale(0) translateY(-200px) translateX(100px); animation: flowe-three 1s linear infinite; animation-delay: 0.6s; }
-.loader svg g path:first-child { fill: var(--fill-color); }
-@keyframes flowe-one { 0% { transform: scale(0.5) translateY(-200px); opacity: 0; } 25% { transform: scale(0.75) translateY(-100px); opacity: 1; } 50% { transform: scale(1) translateY(0px); opacity: 1; } 75% { transform: scale(0.5) translateY(50px); opacity: 1; } 100% { transform: scale(0) translateY(100px); opacity: 0; } }
-@keyframes flowe-two { 0% { transform: scale(0.5) rotateZ(-10deg) translateY(-200px) translateX(-100px); opacity: 0; } 25% { transform: scale(1) rotateZ(-5deg) translateY(-100px) translateX(-50px); opacity: 1; } 50% { transform: scale(1) rotateZ(0deg) translateY(0px) translateX(-25px); opacity: 1; } 75% { transform: scale(0.5) rotateZ(5deg) translateY(50px) translateX(0px); opacity: 1; } 100% { transform: scale(0) rotateZ(10deg) translateY(100px) translateX(25px); opacity: 0; } }
-@keyframes flowe-three { 0% { transform: scale(0.5) rotateZ(10deg) translateY(-200px) translateX(100px); opacity: 0; } 25% { transform: scale(1) rotateZ(5deg) translateY(-100px) translateX(50px); opacity: 1; } 50% { transform: scale(1) rotateZ(0deg) translateY(0px) translateX(25px); opacity: 1; } 75% { transform: scale(0.5) rotateZ(-5deg) translateY(50px) translateX(0px); opacity: 1; } 100% { transform: scale(0) rotateZ(-10deg) translateY(100px) translateX(-25px); opacity: 0; } }
-.loading-text { font-size: 12px; font-weight: 600; color: #38bdf8; }
-.loading-sub { font-size: 10px; color: #64748b; font-family: monospace; }
-.screen-meta-badge { display: flex; flex-direction: row; align-items: center; gap: 6px; font-family: monospace; font-size: 11px; color: #94a3b8; background: rgba(15, 23, 42, 0.9); padding: 6px 10px; border-radius: 6px; border: 1px solid #1e293b; margin-bottom: 8px; overflow: hidden; }
-.screen-meta-badge .meta-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-.summary-box { font-size: 11px; color: #cbd5e1; line-height: 1.4; padding: 8px 10px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; margin-bottom: 8px; }
-.score-card { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; margin-bottom: 8px; }
-.score-number { font-size: 24px; font-weight: 900; font-family: monospace; color: #38bdf8; line-height: 1; }
-.score-details { display: flex; flex-direction: column; gap: 2px; }
-.score-level { font-size: 11px; font-weight: 800; font-family: monospace; }
-.confidence-tag { font-size: 10px; color: #64748b; font-family: monospace; }
-.brand-status { display: flex; flex-direction: row; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #f1f5f9; padding: 6px 10px; background: #0b1120; border-radius: 6px; border: 1px solid #1e293b; margin-bottom: 8px; }
-.status-indicator { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
-.evidence-section { margin-bottom: 10px; }
-.section-title { font-size: 10px; font-family: monospace; color: #64748b; margin-bottom: 4px; }
-.evidence-list { display: flex; flex-direction: column; gap: 4px; }
-.evidence-chip { font-size: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 3px solid #ef4444; padding: 4px 8px; border-radius: 4px; }
-.evidence-chip.warning { border-color: rgba(245, 158, 11, 0.3); border-left-color: #f59e0b; }
-.evidence-chip.clean { border-color: rgba(16, 185, 129, 0.3); border-left-color: #10b981; color: #10b981; }
-.actions-group { display: flex; flex-direction: column; gap: 6px; }
-.open-report-btn { width: 100%; background: #0b1120; color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.4); border-radius: 6px; padding: 7px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
-.open-report-btn:hover { background: rgba(6, 182, 212, 0.15); }
-.hidden { display: none !important; }
-.footer { width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 16px; background: #0b0f19; border-top: 1px solid #1e293b; font-size: 10px; font-family: monospace; color: #64748b; }
-.status-live { color: #10b981; }
-`);
-
-      // Readme instructions in the zip
       zip.file('README_INSTALL.txt', `SCAMSHIELD CHROME / BRAVE / EDGE EXTENSION INSTALLATION:
 
 1. Open your browser and navigate to:
@@ -369,23 +74,175 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
 4. Select this extracted folder.
 5. Click "⚡ Scan Current Screen" in the popup to inspect any job page with AI!`);
 
-      // Generate zip blob and trigger download
       const content = await zip.generateAsync({ type: 'blob' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(content);
-      link.download = 'scamshield-browser-extension-v2.0.zip';
+      link.download = 'scamshield-browser-extension-v2.1.zip';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error('Failed to generate extension zip:', err);
+      // Fallback direct static zip download
+      const link = document.createElement('a');
+      link.href = '/scamshield-extension.zip';
+      link.download = 'scamshield-browser-extension-v2.1.zip';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } finally {
       setIsDownloading(false);
     }
   };
 
+  // Simulated in-browser Extension state
+  const [simState, setSimState] = useState<'idle' | 'loading' | 'result'>('idle');
+  const [simUrl, setSimUrl] = useState('https://careers.infosys-security-deposit.online/offer-letter?ref=2499');
+  const [simCustomInput, setSimCustomInput] = useState('');
+  const [simLoadingText, setSimLoadingText] = useState('Extracting on-screen text...');
+  const [simLoadingSub, setSimLoadingSub] = useState('Analyzing page DOM & threat heuristics');
+  const [simResult, setSimResult] = useState<AnalysisResult | null>(null);
+
+  const presets = [
+    {
+      id: 'scam-infosys',
+      name: '⚠️ Scam Offer (Infosys ₹2,499 Deposit)',
+      url: 'https://careers.infosys-security-deposit.online/offer-letter?ref=2499',
+      title: 'IMMEDIATE SELECTION - INTERNSHIP OFFER LETTER',
+      text: 'Infosys Career Recruitment Hub. Stipend: ₹60,000/Month. MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499 VIA UPI (REFUNDABLE). UPI ID: infosys.security.deposit@oksbi. SEAT EXPIRES IN 24 HOURS! Contact: recruitment.infosys.hr@gmail.com, Telegram: @infosys_onboarding_desk'
+    },
+    {
+      id: 'legit-wealthbank',
+      name: '🛡️ Authentic Offer (Wealth Bank / NovaTech)',
+      url: 'https://careers.wealthbank.internal/offers/maya-patil.pdf',
+      title: 'Employment Offer Letter - Wealth Bank / NovaTech',
+      text: 'EMPLOYMENT OFFER LETTER - Wealth Bank / NovaTech Solutions. Dear Candidate, We are pleased to offer you the position with standard compensation. Terms: Standard enterprise confidentiality. Authorized Signatory: Maya Patil, Head of Human Resources. Zero advance payment required.'
+    },
+    {
+      id: 'paypal-phish',
+      name: '⚠️ Phishing Subdomain (PayPal Verify)',
+      url: 'https://paypal.com.account-verify-auth.xyz/security-submit',
+      title: 'PayPal Account Security Verification Required',
+      text: 'URGENT: Your account has been temporarily locked. Enter full banking credentials and debit card details immediately to unlock within 30 minutes or account is permanently disabled.'
+    }
+  ];
+
+  const runSimulatedScan = async (overrideText?: string, overrideUrl?: string) => {
+    setSimState('loading');
+    setSimLoadingText('Extracting on-screen text & DOM metadata...');
+    setSimLoadingSub('Inspecting active frame for payment demands & brand spoofing');
+
+    const targetUrl = overrideUrl || simUrl;
+    const targetText = overrideText || simCustomInput || (presets.find(p => p.url === targetUrl)?.text) || targetUrl;
+
+    setTimeout(() => {
+      setSimLoadingText('Running AI neural analysis...');
+      setSimLoadingSub('Matching enterprise signatures & threat intelligence');
+    }, 1000);
+
+    setTimeout(() => {
+      const lower = (targetText + ' ' + targetUrl).toLowerCase();
+      const isScam = lower.includes('deposit') || lower.includes('2499') || lower.includes('2,499') || lower.includes('xyz') || lower.includes('security-deposit') || lower.includes('gmail.com') || lower.includes('telegram');
+      const claimedEntity = lower.includes('infosys') ? 'Infosys Limited' : (lower.includes('wealth') ? 'Wealth Bank' : (lower.includes('paypal') ? 'PayPal Holdings' : 'Enterprise Entity'));
+      const claimedDomain = lower.includes('infosys') ? 'infosys.com' : (lower.includes('wealth') ? 'wealthbank.com' : (lower.includes('paypal') ? 'paypal.com' : 'official-domain.com'));
+
+      const result: AnalysisResult = {
+        id: `SS-SIM-${Date.now()}`,
+        title: `${claimedEntity} — Extension Threat & Forensic Audit`,
+        targetType: 'URL',
+        targetValue: targetUrl,
+        analyzedAt: new Date().toLocaleString(),
+        riskScore: isScam ? 88 : 14,
+        riskLevel: isScam ? 'CRITICAL' : 'LOW',
+        confidence: isScam ? 96 : 98,
+        summary: isScam 
+          ? 'High-confidence employment scam detected! Upfront monetary deposit, unofficial recruiter email, or deceptive typo-squatted domain detected.'
+          : 'Verified authentic opportunity. Zero upfront fee demands and official corporate communication verified.',
+        criticalSignalsCount: isScam ? 3 : 0,
+        warningSignalsCount: isScam ? 2 : 0,
+        breakdown: {
+          domainRisk: { score: isScam ? 24 : 3, max: 25, label: 'Domain & Endpoint Forensics', desc: isScam ? 'Domain mismatch or newly registered spoofed TLD.' : 'Authoritative enterprise DNS.' },
+          paymentRisk: { score: isScam ? 25 : 0, max: 25, label: 'Monetary Extraction', desc: isScam ? 'Mandatory refundable security deposit detected.' : 'Zero fee demands.' },
+          identityRisk: { score: isScam ? 18 : 2, max: 20, label: 'Brand & Recruiter Identity', desc: isScam ? 'Free webmail recruiter address.' : 'Authentic corporate communications.' },
+          contentRisk: { score: isScam ? 12 : 3, max: 15, label: 'Linguistic Urgency Pressure', desc: isScam ? 'Urgency timers & artificial scarcity.' : 'Standard hiring terms.' },
+          reputationRisk: { score: isScam ? 9 : 6, max: 15, label: 'Threat Intel Feeds', desc: isScam ? 'Associated with known student employment fraud vectors.' : 'No negative reports.' }
+        },
+        timeline: [
+          { time: '00:01', event: 'Active DOM Extracted', status: 'clean', detail: 'Screen text and hyperlinks parsed.' },
+          { time: '00:02', event: 'Forensic Engine Evaluation', status: isScam ? 'flagged' : 'clean', detail: isScam ? 'Advance-fee fraud patterns identified.' : 'Clean signatures verified.' }
+        ],
+        verification: {
+          claimedName: claimedEntity,
+          claimedDomain: claimedDomain,
+          observedDomain: targetUrl.replace(/^https?:\/\//, '').split('/')[0],
+          isDomainMatch: !isScam,
+          status: isScam ? 'SUSPICIOUS_MISMATCH' : 'VERIFIED',
+          officialWebsite: `https://${claimedDomain}`,
+          officialCareersUrl: `https://${claimedDomain}/careers`,
+          notes: isScam ? 'Severe domain typo-squatting and advance fee extraction detected.' : 'Domain matches authoritative enterprise registry.'
+        },
+        evidenceList: isScam ? [
+          {
+            id: 'sim-ev-1',
+            category: 'payment',
+            title: 'Mandatory Upfront Security Deposit (₹2,499)',
+            severity: 'HIGH',
+            confidence: 97,
+            description: 'Application demands refundable laptop/registration fee prior to onboarding.',
+            detectedQuote: 'MANDATORY LAPTOP & REGISTRATION SECURITY DEPOSIT: ₹2,499',
+            evidenceSource: 'Payment Transaction Heuristic Engine',
+            recommendation: 'Legitimate organizations never ask for upfront payment.'
+          },
+          {
+            id: 'sim-ev-2',
+            category: 'identity',
+            title: 'Free Webmail Recruiter Address',
+            severity: 'CRITICAL',
+            confidence: 95,
+            description: 'Recruiter communicating via public @gmail.com rather than verified corporate domain.',
+            detectedQuote: 'recruitment.infosys.hr@gmail.com',
+            evidenceSource: 'Corporate Mail Exchange Inspector',
+            recommendation: 'Only accept offers from official corporate domains.'
+          }
+        ] : [
+          {
+            id: 'sim-ev-clean',
+            category: 'domain',
+            title: 'Official Corporate Portal & Zero Fees',
+            severity: 'LOW',
+            confidence: 99,
+            description: 'Legitimate enterprise infrastructure verified with zero advance fee demands.',
+            detectedQuote: 'Zero advance payment required',
+            evidenceSource: 'Official Corporate DNS & SSL Registry',
+            recommendation: 'Safe to proceed with standard process.'
+          }
+        ],
+        safeActions: isScam ? [
+          'Do NOT transfer any money or scan UPI QR codes.',
+          'Verify candidate status directly on the official careers portal.',
+          'Report the incident to the cybercrime portal (cybercrime.gov.in).'
+        ] : [
+          'Proceed with standard candidate interview stages.',
+          'Always submit documents through authenticated candidate portals.'
+        ],
+        tags: isScam ? ['Advance Fee Scam', 'Free Webmail Recruiter', 'Deceptive Domain'] : ['Verified Official Opportunity', 'Zero Financial Traps'],
+        rawIndicators: {
+          sslValid: true,
+          domainAgeDays: isScam ? 4 : 4520,
+          registrar: isScam ? 'NameCheap Privacy Protect Ltd' : 'MarkMonitor Enterprise Inc',
+          honeypotMatches: isScam ? 3 : 0,
+          aiToxicityScore: isScam ? 0.94 : 0.08,
+          telegramOrWhatsappHop: isScam,
+          upfrontFeeRequested: isScam
+        }
+      };
+
+      setSimResult(result);
+      setSimState('result');
+    }, 2000);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-10">
+    <div className="max-w-7xl mx-auto pt-24 sm:pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-8 space-y-12">
       
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -415,6 +272,15 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
             <span>{isDownloading ? 'Packaging Extension...' : 'Download Extension (.zip)'}</span>
           </button>
 
+          <a
+            href="/scamshield-extension.zip"
+            download="scamshield-browser-extension-v2.1.zip"
+            className="px-5 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-cyan-500/40 hover:border-cyan-400 font-semibold text-xs flex items-center gap-2 transition"
+          >
+            <Download className="w-4 h-4 text-cyan-400" />
+            <span>Direct .ZIP Download</span>
+          </a>
+
           <button
             onClick={handleCopyPath}
             className="px-5 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 hover:border-cyan-500/50 font-semibold text-xs flex items-center gap-2 transition cursor-pointer"
@@ -426,6 +292,337 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
             )}
             <span>{copiedPath ? 'Extension Path Copied!' : 'Copy Local Folder Path'}</span>
           </button>
+        </div>
+      </div>
+
+      {/* Interactive Live Browser & Extension Simulator Sandbox */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+              <h2 className="text-lg sm:text-xl font-bold text-white font-mono flex items-center gap-2">
+                <span>Interactive Extension Sandbox</span>
+                <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded">LIVE DEMO</span>
+              </h2>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Experience the actual extension workflow right here: click <strong className="text-cyan-400">⚡ Scan Current Screen</strong> to watch the 2-second AI inspection and risk score calculation.
+            </p>
+          </div>
+
+          {/* Quick Preset Scenarios */}
+          <div className="flex flex-wrap items-center gap-2">
+            {presets.map(p => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  setSimUrl(p.url);
+                  setSimCustomInput(p.text);
+                  setSimState('idle');
+                  setSimResult(null);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition border cursor-pointer ${
+                  simUrl === p.url
+                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
+                    : 'bg-slate-900/90 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Realistic Simulated Browser Window Frame */}
+        <div className="rounded-2xl bg-slate-950 border-2 border-cyan-500/30 shadow-2xl overflow-hidden relative">
+          
+          {/* Simulated Browser Chrome / Top Bar */}
+          <div className="bg-[#0b0f19] border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+              <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+              <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+            </div>
+
+            {/* Address bar */}
+            <div className="flex-1 min-w-[240px] max-w-2xl bg-slate-950/90 rounded-lg px-3 py-1.5 flex items-center gap-2 text-xs font-mono border border-slate-800 focus-within:border-cyan-400">
+              <Globe className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+              <input
+                type="text"
+                value={simUrl}
+                onChange={(e) => {
+                  setSimUrl(e.target.value);
+                  setSimState('idle');
+                }}
+                className="flex-1 bg-transparent text-slate-200 outline-none font-mono text-[11px]"
+                placeholder="Enter URL to inspect..."
+              />
+              <button
+                onClick={() => runSimulatedScan(simCustomInput || simUrl, simUrl)}
+                disabled={simState === 'loading'}
+                className="px-2.5 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-[10px] tracking-wider uppercase transition cursor-pointer"
+              >
+                {simState === 'loading' ? 'Inspecting...' : 'Audit'}
+              </button>
+            </div>
+
+            {/* Extension Toolbar Badge */}
+            <div className="flex items-center gap-2">
+              <div className={`px-2.5 py-1 rounded-lg border text-xs font-mono font-bold flex items-center gap-1.5 ${
+                simResult?.riskScore && simResult.riskScore >= 70
+                  ? 'bg-rose-500/20 border-rose-500 text-rose-400'
+                  : (simResult?.riskScore 
+                      ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                      : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300')
+              }`}>
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>{simResult?.riskScore ? `${simResult.riskScore}/100` : 'AI ACTIVE'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Webpage Content + Floating Overlaid Extension Popup */}
+          <div className="p-4 sm:p-8 bg-gradient-to-br from-[#070b14] via-[#040711] to-[#02050d] min-h-[500px] relative flex flex-col lg:flex-row gap-6 items-start justify-between">
+            
+            {/* Left Simulated Page Body */}
+            <div className="flex-1 w-full space-y-4 max-w-xl">
+              <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white font-mono">
+                      {simUrl.includes('infosys') ? 'Infosys Recruitment Drive' : (simUrl.includes('wealth') ? 'Wealth Bank Careers' : 'Candidate Portal')}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                    HTTP 200 OK
+                  </span>
+                </div>
+                <div className="text-xs text-slate-300 bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 font-mono leading-relaxed max-h-48 overflow-y-auto">
+                  {simCustomInput || (presets.find(p => p.url === simUrl)?.text) || 'Enter content or test URL to inspect page payload...'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 opacity-60">
+                <div className="h-14 rounded-xl bg-slate-900/40 border border-slate-800/60" />
+                <div className="h-14 rounded-xl bg-slate-900/40 border border-slate-800/60" />
+              </div>
+            </div>
+
+            {/* Right Overlaid Extension Popup Sandbox */}
+            <div className="w-full sm:w-[350px] mx-auto lg:mx-0 rounded-2xl bg-[#030712] border-2 border-cyan-500/60 shadow-2xl shadow-cyan-950/50 flex flex-col overflow-hidden text-slate-100">
+              
+              {/* Extension Popup Header */}
+              <div className="flex items-center justify-between px-4 py-3 bg-[#0b0f19] border-b border-cyan-500/25">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#06b6d4]" />
+                  <span className="font-extrabold tracking-wider text-cyan-400 text-xs">SCAMSHIELD</span>
+                </div>
+                <span className="text-[10px] font-mono bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">
+                  AI LIVE v2.1
+                </span>
+              </div>
+
+              {/* Extension Popup Body */}
+              <div className="p-3.5 space-y-3 bg-[#030712]">
+                
+                {/* ⚡ Scan Current Screen Hero Button */}
+                <button
+                  onClick={() => runSimulatedScan()}
+                  disabled={simState === 'loading'}
+                  className="w-full flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-sky-600 to-blue-600 hover:from-cyan-400 hover:to-blue-500 border border-cyan-300 rounded-xl p-3 text-white cursor-pointer shadow-lg shadow-cyan-500/30 transition text-left active:scale-[0.98]"
+                >
+                  <span className="text-xl bg-white/20 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow">
+                    ⚡
+                  </span>
+                  <span className="flex flex-col">
+                    <strong className="text-xs font-bold leading-tight">Scan Current Screen</strong>
+                    <small className="text-[10px] text-cyan-100 opacity-90">Extract page text & detect risks with AI</small>
+                  </span>
+                </button>
+
+                {/* Quick Paste Bar */}
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={simCustomInput}
+                    onChange={(e) => setSimCustomInput(e.target.value)}
+                    placeholder="Or paste link / offer text..."
+                    className="flex-1 bg-[#0b1120] border border-slate-800 text-slate-200 text-[11px] px-2.5 py-1.5 rounded-lg outline-none focus:border-cyan-400 font-mono"
+                  />
+                  <button
+                    onClick={() => runSimulatedScan(simCustomInput || simUrl, simUrl)}
+                    disabled={simState === 'loading'}
+                    className="bg-cyan-500/15 hover:bg-cyan-500 text-cyan-300 hover:text-slate-950 border border-cyan-500/35 rounded-lg px-3 py-1.5 text-xs font-bold font-mono transition cursor-pointer"
+                  >
+                    Scan
+                  </button>
+                </div>
+
+                {/* Idle State */}
+                {simState === 'idle' && (
+                  <div className="text-center p-4 rounded-xl bg-slate-900/70 border border-dashed border-cyan-500/25 space-y-2">
+                    <div className="text-2xl">🛡️</div>
+                    <div className="text-xs font-bold text-white font-mono">Ready for Screen Scan</div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Click the button above to inspect visible page text and evaluate risk with AI.
+                    </p>
+                    <div className="flex flex-col gap-1 items-center pt-1">
+                      <span className="text-[9px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">✓ Upfront Fee Extraction</span>
+                      <span className="text-[9px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">✓ Brand & Domain Match</span>
+                      <span className="text-[9px] font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">✓ Telegram/Chat Traps</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2-Second Animated SVG Loader State */}
+                {simState === 'loading' && (
+                  <div className="py-6 flex flex-col items-center justify-center space-y-2 text-center">
+                    <div className="loader">
+                      <svg id="pegtopone" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+                        <defs>
+                          <filter id="shine1"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
+                          <mask id="mask1"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
+                          <radialGradient id="gradient-1-1" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.3"></stop><stop offset="50%" stopColor="black" stopOpacity="0.1"></stop><stop offset="100%" stopColor="black" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-2-1" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="white" stopOpacity="0.3"></stop><stop offset="50%" stopColor="white" stopOpacity="0.1"></stop><stop offset="100%" stopColor="white" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-3-1" cx="85" cy="50" fx="85" fy="50" xlinkHref="#gradient-2-1"></radialGradient>
+                          <radialGradient id="gradient-4-1" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlinkHref="#gradient-3-1"></radialGradient>
+                          <linearGradient id="gradient-5-1" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.2"></stop><stop offset="40%" stopColor="black" stopOpacity="0"></stop></linearGradient>
+                        </defs>
+                        <g>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-1)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" strokeWidth="3" filter="url(#shine1)" mask="url(#mask1)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-1)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-1)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-1)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-1)"></path>
+                        </g>
+                      </svg>
+                      <svg id="pegtoptwo" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+                        <defs>
+                          <filter id="shine2"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
+                          <mask id="mask2"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
+                          <radialGradient id="gradient-1-2" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.3"></stop><stop offset="50%" stopColor="black" stopOpacity="0.1"></stop><stop offset="100%" stopColor="black" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-2-2" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="white" stopOpacity="0.3"></stop><stop offset="50%" stopColor="white" stopOpacity="0.1"></stop><stop offset="100%" stopColor="white" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-3-2" cx="85" cy="50" fx="85" fy="50" xlinkHref="#gradient-2-2"></radialGradient>
+                          <radialGradient id="gradient-4-2" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlinkHref="#gradient-3-2"></radialGradient>
+                          <linearGradient id="gradient-5-2" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.2"></stop><stop offset="40%" stopColor="black" stopOpacity="0"></stop></linearGradient>
+                        </defs>
+                        <g>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-2)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" strokeWidth="3" filter="url(#shine2)" mask="url(#mask2)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-2)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-2)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-2)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-2)"></path>
+                        </g>
+                      </svg>
+                      <svg id="pegtopthree" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+                        <defs>
+                          <filter id="shine3"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
+                          <mask id="mask3"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white"></path></mask>
+                          <radialGradient id="gradient-1-3" cx="50" cy="66" fx="50" fy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.3"></stop><stop offset="50%" stopColor="black" stopOpacity="0.1"></stop><stop offset="100%" stopColor="black" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-2-3" cx="55" cy="20" fx="55" fy="20" r="30" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="white" stopOpacity="0.3"></stop><stop offset="50%" stopColor="white" stopOpacity="0.1"></stop><stop offset="100%" stopColor="white" stopOpacity="0"></stop></radialGradient>
+                          <radialGradient id="gradient-3-3" cx="85" cy="50" fx="85" fy="50" xlinkHref="#gradient-2-3"></radialGradient>
+                          <radialGradient id="gradient-4-3" cx="50" cy="58" fx="50" fy="58" r="60" gradientTransform="translate(0 47) scale(1 0.2)" xlinkHref="#gradient-3-3"></radialGradient>
+                          <linearGradient id="gradient-5-3" x1="50" y1="90" x2="50" y2="10" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.2"></stop><stop offset="40%" stopColor="black" stopOpacity="0"></stop></linearGradient>
+                        </defs>
+                        <g>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-1-3)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="none" stroke="white" opacity="0.3" strokeWidth="3" filter="url(#shine3)" mask="url(#mask3)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-2-3)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-3-3)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-4-3)"></path>
+                          <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#gradient-5-3)"></path>
+                        </g>
+                      </svg>
+                    </div>
+                    <p className="text-xs font-bold text-cyan-400 font-mono">{simLoadingText}</p>
+                    <div className="text-[10px] text-slate-400 font-mono">{simLoadingSub}</div>
+                  </div>
+                )}
+
+                {/* Result Card State */}
+                {simState === 'result' && simResult && (
+                  <div className="space-y-2.5 pt-1 animate-in fade-in duration-300">
+                    <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400 bg-slate-900/90 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                      <span>🖥️</span>
+                      <span className="truncate flex-1">{simUrl}</span>
+                    </div>
+
+                    <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${
+                      simResult.riskLevel === 'CRITICAL'
+                        ? 'bg-rose-950/40 border-rose-500/50'
+                        : 'bg-emerald-950/40 border-emerald-500/50'
+                    }`}>
+                      <div className={`text-2xl font-black font-mono leading-none ${
+                        simResult.riskLevel === 'CRITICAL' ? 'text-rose-400' : 'text-emerald-400'
+                      }`}>
+                        {simResult.riskScore}/100
+                      </div>
+                      <div className="flex flex-col">
+                        <div className={`text-xs font-bold font-mono ${
+                          simResult.riskLevel === 'CRITICAL' ? 'text-rose-400' : 'text-emerald-400'
+                        }`}>
+                          {simResult.riskLevel} RISK
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{simResult.confidence}% AI Confidence</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[11px] font-bold text-slate-200 bg-[#0b1120] px-2.5 py-1.5 rounded-lg border border-slate-800">
+                      <span className={`w-2 h-2 rounded-full ${
+                        simResult.riskLevel === 'CRITICAL' ? 'bg-rose-500' : 'bg-emerald-500'
+                      }`} />
+                      <span>{simResult.verification?.claimedName ? `Entity: ${simResult.verification.claimedName}` : 'Verified Entity'}</span>
+                    </div>
+
+                    <div className="text-[11px] text-slate-300 leading-relaxed bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80">
+                      {simResult.summary}
+                    </div>
+
+                    {/* Detected Evidence List */}
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">AI Detection Evidence</div>
+                      {simResult.evidenceList.map((ev, i) => (
+                        <div 
+                          key={i} 
+                          className={`text-[10px] p-2 rounded-lg border ${
+                            ev.severity === 'CRITICAL' || ev.severity === 'HIGH'
+                              ? 'bg-rose-950/20 border-rose-500/30 border-l-2 border-l-rose-500 text-slate-200'
+                              : 'bg-emerald-950/20 border-emerald-500/30 border-l-2 border-l-emerald-500 text-emerald-300'
+                          }`}
+                        >
+                          <strong>{ev.title}:</strong> <span className="opacity-90">{ev.description}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Open Full Security Report Button */}
+                    <button
+                      onClick={() => onOpenReport(simResult)}
+                      className="w-full bg-[#0b1120] hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 border border-cyan-500/40 rounded-lg py-2 text-xs font-bold font-mono transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md"
+                    >
+                      <span>Open Full Security Report</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Extension Popup Footer */}
+              <div className="flex items-center justify-between px-4 py-2 bg-[#0b0f19] border-t border-slate-800 text-[10px] font-mono text-slate-500">
+                <span>AI Risk Engine</span>
+                <span className="text-emerald-400">● SOC Active</span>
+              </div>
+
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -445,19 +642,19 @@ html, body { width: 350px; min-width: 350px; max-width: 350px; margin: 0; paddin
           <div className="flex items-center gap-1.5 p-1 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono">
             <button
               onClick={() => setSelectedBrowser('chrome')}
-              className={`px-3 py-1.5 rounded-md transition ${selectedBrowser === 'chrome' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-md transition cursor-pointer ${selectedBrowser === 'chrome' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
             >
               Chrome
             </button>
             <button
               onClick={() => setSelectedBrowser('edge')}
-              className={`px-3 py-1.5 rounded-md transition ${selectedBrowser === 'edge' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-md transition cursor-pointer ${selectedBrowser === 'edge' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
             >
               Edge
             </button>
             <button
               onClick={() => setSelectedBrowser('brave')}
-              className={`px-3 py-1.5 rounded-md transition ${selectedBrowser === 'brave' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-md transition cursor-pointer ${selectedBrowser === 'brave' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
             >
               Brave
             </button>
