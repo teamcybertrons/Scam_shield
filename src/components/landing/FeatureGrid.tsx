@@ -3,10 +3,9 @@ import {
   ShieldCheck, 
   Network, 
   Bot, 
-  Globe, 
+  Globe,
   ArrowRight,
-  Sparkles,
-  Zap
+  Sparkles
 } from 'lucide-react';
 import { ActiveTab } from '../../types';
 import { Card3DTilt } from '../common/Card3DTilt';
@@ -92,7 +91,7 @@ export const FeatureGrid: React.FC<FeatureGridProps> = ({ setActiveTab }) => {
           </p>
         </div>
 
-        {/* 4 Interactive 3D Tilt Feature Cards */}
+        {/* Interactive 3D Tilt Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((f, i) => {
             const Icon = f.icon;

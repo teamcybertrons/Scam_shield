@@ -12,8 +12,9 @@ import { ScannerEngine } from './components/scanner/ScannerEngine';
 import { ScanningAnimation } from './components/scanner/ScanningAnimation';
 import { AnalysisReportView } from './components/scanner/AnalysisReportView';
 import { ThreatDashboard } from './components/threat-intel/ThreatDashboard';
-import { ExtensionMockup } from './components/extension/ExtensionMockup';
+import { ExtensionView } from './components/extension/ExtensionView';
 import { WhatsAppBotView } from './components/whatsapp/WhatsAppBotView';
+import { SoundFX } from './services/soundEffects';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
@@ -77,6 +78,7 @@ export const App: React.FC = () => {
         setSavedReports(prev => [result, ...prev.filter(r => r.id !== result.id)]);
         setIsScanning(false);
         setActiveTab('report');
+        SoundFX.playScoreReveal(result.riskScore);
         showToast(`Security Audit Generated: ${result.id} (Score: ${result.riskScore}/100)`);
       }
     } catch (err) {
@@ -173,12 +175,12 @@ export const App: React.FC = () => {
 
             {/* 5. Browser Extension Showcase */}
             {activeTab === 'extension' && (
-              <ExtensionMockup
+              <ExtensionView
+                setActiveTab={setActiveTab}
                 onOpenReport={() => {
                   setActiveTab('report');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                setActiveTab={setActiveTab}
               />
             )}
 

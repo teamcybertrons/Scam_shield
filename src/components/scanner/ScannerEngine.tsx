@@ -11,6 +11,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { Card3DTilt } from '../common/Card3DTilt';
+import { SoundFX } from '../../services/soundEffects';
 
 interface ScannerEngineProps {
   onAnalyze: (type: 'URL' | 'MESSAGE' | 'SCREENSHOT', value: string) => void;
@@ -85,6 +86,7 @@ export const ScannerEngine: React.FC<ScannerEngineProps> = ({ onAnalyze }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    SoundFX.playScanStart();
     if (activeTab === 'URL') {
       if (!url.trim()) return;
       onAnalyze('URL', url.trim());

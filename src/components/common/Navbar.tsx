@@ -4,7 +4,7 @@ import {
   ShieldCheck, 
   Search, 
   Activity, 
-  Globe, 
+  Globe,
   MessageSquare, 
   Menu, 
   X,
@@ -12,9 +12,12 @@ import {
   ArrowRight,
   ChevronDown,
   Layers,
-  Plus
+  Plus,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { ScamShieldAPI } from '../../services/api';
+import { SoundFX } from '../../services/soundEffects';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -31,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(SoundFX.getMuted());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,8 +100,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     { 
       id: 'extension', 
       label: 'Browser Extension', 
-      desc: 'Manifest V3 active tab cyber defense & screen OCR', 
-      icon: Globe 
+      desc: 'Manifest V3 active tab cyber defense & real-time warnings', 
+      icon: Globe,
+      badge: 'v2.1',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300'
     },
     { 
       id: 'whatsapp-bot', 
@@ -226,9 +232,26 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* 3. Right: Engine Status & Threat Scanner CTA */}
+        {/* 3. Right: Sound FX, Engine Status & Threat Scanner CTA */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           
+          {/* Sound FX Toggle Button */}
+          <button
+            onClick={() => {
+              const newMuted = SoundFX.toggleMute();
+              setIsAudioMuted(newMuted);
+            }}
+            className={`p-2 rounded-full border transition flex items-center justify-center cursor-pointer ${
+              isAudioMuted 
+                ? 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-300' 
+                : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 shadow-sm shadow-cyan-500/20'
+            }`}
+            title={isAudioMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+            aria-label="Toggle Sound Effects"
+          >
+            {isAudioMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+          </button>
+
           {/* Status Badge */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/80 border border-slate-800 text-[11px] font-mono shadow-sm">
             <span className={`w-2 h-2 rounded-full ${backendOnline !== false ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-amber-400'}`} />

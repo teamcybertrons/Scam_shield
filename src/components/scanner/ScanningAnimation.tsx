@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Check, Loader2, Cpu, Database, Globe, CreditCard, Sparkles, Crosshair } from 'lucide-react';
 import { Card3DTilt } from '../common/Card3DTilt';
+import { SoundFX } from '../../services/soundEffects';
 
 interface ScanningAnimationProps {
   onComplete?: () => void;
@@ -19,11 +20,21 @@ export const ScanningAnimation: React.FC<ScanningAnimationProps> = ({ onComplete
     { title: 'Generating cryptographic evidence report', icon: Sparkles, detail: 'Formatting risk breakdown, verified evidence quotes, and safe action checklist...' },
   ];
 
+  // Play initial scan start sound
   useEffect(() => {
+    SoundFX.playScanStart();
+  }, []);
+
+  useEffect(() => {
+    // Play sound for step pulse
+    SoundFX.playStepPulse(currentStepIndex);
+
     const timer = setInterval(() => {
       setCurrentStepIndex((prev) => {
         if (prev < steps.length - 1) {
-          return prev + 1;
+          const next = prev + 1;
+          SoundFX.playStepPulse(next);
+          return next;
         } else {
           clearInterval(timer);
           if (onComplete) {
